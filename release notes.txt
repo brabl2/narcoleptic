@@ -1,2 +1,4 @@
 Narcoleptic v1 release:
   First release version
+
+License updated to GPLv3
