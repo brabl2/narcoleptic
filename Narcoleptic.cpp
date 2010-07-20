@@ -55,9 +55,9 @@ void NarcolepticClass::sleep(uint8_t wdt_period) {
   wdt_enable(wdt_period);
   wdt_reset();
 #ifdef WDTCSR
-  WDTCSR |= ~_BV(WDIE);
+  WDTCSR |= _BV(WDIE);
 #else
-  WDTCR |= ~_BV(WDIE);
+  WDTCR |= _BV(WDIE);
 #endif
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 
