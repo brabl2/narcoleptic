@@ -26,6 +26,24 @@ class NarcolepticClass
 {
   public:
     void delay(int milliseconds);
+    void begin();
+
+    void disableWire();
+    void disableTimer2();
+    void disableTimer1();
+    void disableMillis();
+    void disableSerial();
+    void disableADC();
+    void disableSPI();
+
+    void enableWire();
+    void enableTimer2();
+    void enableTimer1();
+    void enableMillis();
+    void enableSerial();
+    void enableADC();
+    void enableSPI();
+
   private:
     void sleep(uint8_t);
 };
