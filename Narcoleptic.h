@@ -43,8 +43,10 @@ class NarcolepticClass
     void enableADC();
     void enableSPI();
 
+    uint32_t calibrate();
+
   private:
-    void sleep(uint8_t);
+    void sleep(uint8_t,uint8_t);
 };
 extern NarcolepticClass Narcoleptic;
 
