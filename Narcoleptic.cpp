@@ -36,6 +36,11 @@ SIGNAL(WDT_vect) {
 }
 
 void NarcolepticClass::sleep(uint8_t wdt_period) {
+#ifdef BODSE
+  // Turn off BOD in sleep (picopower devices only)
+  MCUCR |= _BV(BODSE);
+  MCUCR |= _BV(BODS);
+#endif
   wdt_enable(wdt_period);
   wdt_reset();
 #ifdef WDTCSR
@@ -64,14 +69,6 @@ void NarcolepticClass::delay(int milliseconds) {
   if (milliseconds >= 60)      { sleep(WDTO_60MS); milliseconds -= 60; }
   if (milliseconds >= 30)      { sleep(WDTO_30MS); milliseconds -= 30; }
   if (milliseconds >= 15)      { sleep(WDTO_15MS); milliseconds -= 15; }
-}
-
-void NarcolepticClass::begin() {
-#ifdef BODSE
-  // Turn off BOD in sleep (picopower devices only)
-  MCUCR |= _BV(BODSE);
-  MCUCR |= _BV(BODS);
-#endif
 }
 
 void NarcolepticClass::disableWire() {

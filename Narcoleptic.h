@@ -26,7 +26,6 @@ class NarcolepticClass
 {
   public:
     void delay(int milliseconds);
-    void begin();
 
     void disableWire();
     void disableTimer2();
