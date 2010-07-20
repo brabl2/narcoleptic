@@ -36,11 +36,6 @@ SIGNAL(WDT_vect) {
 }
 
 void NarcolepticClass::sleep(uint8_t wdt_period) {
-  uint8_t 
-    SREGcopy,EECRcopy,EIMSKcopy,PCMSK0copy,PCMSK1copy, 
-    PCMSK2copy,TIMSK0copy,TIMSK1copy,TIMSK2copy,
-    SPCRcopy,UCSR0Bcopy,TWCRcopy,ACSRcopy,
-    ADCSRAcopy,SPMCSRcopy;
   
 #ifdef BODSE
   // Turn off BOD in sleep (picopower devices only)
@@ -62,41 +57,98 @@ void NarcolepticClass::sleep(uint8_t wdt_period) {
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 
   // Disable all interrupts
-  SREGcopy = SREG; cli();
-  EECRcopy = EECR; EECR &= ~_BV(EERIE);
-  EIMSKcopy = EIMSK; EIMSK = 0;
-  PCMSK0copy = PCMSK0; PCMSK0 = 0;
-  PCMSK1copy = PCMSK1; PCMSK1 = 0;
-  PCMSK2copy = PCMSK2; PCMSK2 = 0;
-  TIMSK0copy = TIMSK0; TIMSK0 = 0;
-  TIMSK1copy = TIMSK1; TIMSK1 = 0;
-  TIMSK2copy = TIMSK2; TIMSK2 = 0;
-  SPCRcopy = SPCR; SPCR &= ~_BV(SPIE);
-  UCSR0Bcopy = UCSR0B; UCSR0B &= ~(_BV(RXCIE0) | _BV(TXCIE0) | _BV(UDRIE0));
-  TWCRcopy = TWCR; TWCR &= ~_BV(TWIE);
-  ACSRcopy = ACSR; ACSR &= ~_BV(ACIE);
-  ADCSRAcopy = ADCSRA; ADCSRA &= ~_BV(ADIE);
-  SPMCSRcopy = SPMCSR; SPMCSR &= ~_BV(SPMIE);
+  uint8_t SREGcopy = SREG; cli();
+
+#ifdef EECR
+  uint8_t EECRcopy = EECR; EECR &= ~_BV(EERIE);
+#endif
+#ifdef EIMSK
+  uint8_t EIMSKcopy = EIMSK; EIMSK = 0;
+#endif
+#ifdef PCMSK0
+  uint8_t PCMSK0copy = PCMSK0; PCMSK0 = 0;
+#endif
+#ifdef PCMSK1
+  uint8_t PCMSK1copy = PCMSK1; PCMSK1 = 0;
+#endif
+#ifdef PCMSK2
+  uint8_t PCMSK2copy = PCMSK2; PCMSK2 = 0;
+#endif
+#ifdef TIMSK0
+  uint8_t TIMSK0copy = TIMSK0; TIMSK0 = 0;
+#endif
+#ifdef TIMSK1
+  uint8_t TIMSK1copy = TIMSK1; TIMSK1 = 0;
+#endif
+#ifdef TIMSK2
+  uint8_t TIMSK2copy = TIMSK2; TIMSK2 = 0;
+#endif
+#ifdef SPCR
+  uint8_t SPCRcopy = SPCR; SPCR &= ~_BV(SPIE);
+#endif
+#ifdef UCSR0B
+  uint8_t UCSR0Bcopy = UCSR0B; UCSR0B &= ~(_BV(RXCIE0) | _BV(TXCIE0) | _BV(UDRIE0));
+#endif
+#ifdef TWCR
+  uint8_t TWCRcopy = TWCR; TWCR &= ~_BV(TWIE);
+#endif
+#ifdef ACSR
+  uint8_t ACSRcopy = ACSR; ACSR &= ~_BV(ACIE);
+#endif
+#ifdef ADCSRA
+  uint8_t ADCSRAcopy = ADCSRA; ADCSRA &= ~_BV(ADIE);
+#endif
+#ifdef SPMCSR
+  uint8_t SPMCSRcopy = SPMCSR; SPMCSR &= ~_BV(SPMIE);
+#endif
   
   sei();
   sleep_mode();
   wdt_disable();
 
   // Reenable all interrupts
+#ifdef SPMCSR
   SPMCSR = SPMCSRcopy;
+#endif
+#ifdef ADCSRA
   ADCSRA = ADCSRAcopy;
+#endif
+#ifdef ACSR
   ACSR = ACSRcopy;
+#endif
+#ifdef TWCR
   TWCR = TWCRcopy;
+#endif
+#ifdef UCSR0B
   UCSR0B = UCSR0Bcopy;
+#endif
+#ifdef SPCR
   SPCR = SPCRcopy;
+#endif
+#ifdef TIMSK2
   TIMSK2 = TIMSK2copy;
+#endif
+#ifdef TIMSK1
   TIMSK1 = TIMSK1copy;
+#endif
+#ifdef TIMSK0
   TIMSK0 = TIMSK0copy;
+#endif
+#ifdef PCMSK2
   PCMSK2 = PCMSK2copy;
+#endif
+#ifdef PCMSK1
   PCMSK1 = PCMSK1copy;
+#endif
+#ifdef PCMSK0
   PCMSK0 = PCMSK0copy;
+#endif
+#ifdef EIMSK
   EIMSK = EIMSKcopy;
+#endif
+#ifdef EECR
   EECR = EECRcopy;
+#endif
 
   SREG = SREGcopy;
   
