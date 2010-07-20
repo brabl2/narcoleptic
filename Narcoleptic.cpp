@@ -36,11 +36,22 @@ SIGNAL(WDT_vect) {
 }
 
 void NarcolepticClass::sleep(uint8_t wdt_period) {
+  uint8_t 
+    SREGcopy,EECRcopy,EIMSKcopy,PCMSK0copy,PCMSK1copy, 
+    PCMSK2copy,TIMSK0copy,TIMSK1copy,TIMSK2copy,
+    SPCRcopy,UCSR0Bcopy,TWCRcopy,ACSRcopy,
+    ADCSRAcopy,SPMCSRcopy;
+  
 #ifdef BODSE
   // Turn off BOD in sleep (picopower devices only)
   MCUCR |= _BV(BODSE);
   MCUCR |= _BV(BODS);
 #endif
+
+  MCUSR = 0;
+  WDTCSR &= ~_BV(WDE);
+  WDTCSR = _BV(WDIF) | _BV(WDIE) | _BV(WDCE);
+  
   wdt_enable(wdt_period);
   wdt_reset();
 #ifdef WDTCSR
@@ -49,8 +60,46 @@ void NarcolepticClass::sleep(uint8_t wdt_period) {
   WDTCR |= ~_BV(WDIE);
 #endif
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+
+  // Disable all interrupts
+  SREGcopy = SREG; cli();
+  EECRcopy = EECR; EECR &= ~_BV(EERIE);
+  EIMSKcopy = EIMSK; EIMSK = 0;
+  PCMSK0copy = PCMSK0; PCMSK0 = 0;
+  PCMSK1copy = PCMSK1; PCMSK1 = 0;
+  PCMSK2copy = PCMSK2; PCMSK2 = 0;
+  TIMSK0copy = TIMSK0; TIMSK0 = 0;
+  TIMSK1copy = TIMSK1; TIMSK1 = 0;
+  TIMSK2copy = TIMSK2; TIMSK2 = 0;
+  SPCRcopy = SPCR; SPCR &= ~_BV(SPIE);
+  UCSR0Bcopy = UCSR0B; UCSR0B &= ~(_BV(RXCIE0) | _BV(TXCIE0) | _BV(UDRIE0));
+  TWCRcopy = TWCR; TWCR &= ~_BV(TWIE);
+  ACSRcopy = ACSR; ACSR &= ~_BV(ACIE);
+  ADCSRAcopy = ADCSRA; ADCSRA &= ~_BV(ADIE);
+  SPMCSRcopy = SPMCSR; SPMCSR &= ~_BV(SPMIE);
+  
+  sei();
   sleep_mode();
   wdt_disable();
+
+  // Reenable all interrupts
+  SPMCSR = SPMCSRcopy;
+  ADCSRA = ADCSRAcopy;
+  ACSR = ACSRcopy;
+  TWCR = TWCRcopy;
+  UCSR0B = UCSR0Bcopy;
+  SPCR = SPCRcopy;
+  TIMSK2 = TIMSK2copy;
+  TIMSK1 = TIMSK1copy;
+  TIMSK0 = TIMSK0copy;
+  PCMSK2 = PCMSK2copy;
+  PCMSK1 = PCMSK1copy;
+  PCMSK0 = PCMSK0copy;
+  EIMSK = EIMSKcopy;
+  EECR = EECRcopy;
+
+  SREG = SREGcopy;
+  
 #ifdef WDTCSR
   WDTCSR &= ~_BV(WDIE);
 #else
