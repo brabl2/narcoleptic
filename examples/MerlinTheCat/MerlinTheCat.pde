@@ -41,6 +41,14 @@ void setup() {
   digitalWrite(2,HIGH);
   pinMode(13,OUTPUT);
   digitalWrite(13,LOW);
+  
+  // Narcoleptic.disableMillis(); Do not disable millis - we need it for our delay() function.
+  Narcoleptic.disableTimer1();
+  Narcoleptic.disableTimer2();
+  Narcoleptic.disableSerial();
+  Narcoleptic.disableADC();
+  Narcoleptic.disableWire();
+  Narcoleptic.disableSPI();
 }
 
 void loop() {

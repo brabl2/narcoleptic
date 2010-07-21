@@ -26,6 +26,7 @@
 #include "Narcoleptic.h"
 
 uint32_t watchdogTime_us = 16000;
+uint32_t millisCounter = 0;
 
 SIGNAL(WDT_vect) {
   wdt_disable();
@@ -161,23 +162,80 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
 #endif
 }
 
+
 void NarcolepticClass::delay(int milliseconds) {
-  uint32_t microseconds = milliseconds * 1000;
-  uint16_t sleep_periods = microseconds / watchdogTime_us;
-  while (sleep_periods >= 512) {
-    sleep(WDTO_8S,SLEEP_MODE_PWR_DOWN);
-    sleep_periods -= 512;
+  millisCounter += milliseconds;
+  uint32_t microseconds = milliseconds * 1000L;
+  
+  calibrate();
+  microseconds -= watchdogTime_us;
+  
+  if (microseconds > 0) {
+    uint16_t sleep_periods = microseconds / watchdogTime_us;
+    while (sleep_periods >= 512) {
+      sleep(WDTO_8S,SLEEP_MODE_PWR_DOWN);
+      sleep_periods -= 512;
+    }
+    if (sleep_periods & 256) sleep(WDTO_4S,SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 128) sleep(WDTO_2S,SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 64) sleep(WDTO_1S,SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 32) sleep(WDTO_500MS,SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 16) sleep(WDTO_250MS,SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 8) sleep(WDTO_120MS,SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 4) sleep(WDTO_60MS,SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 2) sleep(WDTO_30MS,SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 1) sleep(WDTO_15MS,SLEEP_MODE_PWR_DOWN);
   }
-  if (sleep_periods & 256) sleep(WDTO_4S,SLEEP_MODE_PWR_DOWN);
-  if (sleep_periods & 128) sleep(WDTO_2S,SLEEP_MODE_PWR_DOWN);
-  if (sleep_periods & 64) sleep(WDTO_1S,SLEEP_MODE_PWR_DOWN);
-  if (sleep_periods & 32) sleep(WDTO_500MS,SLEEP_MODE_PWR_DOWN);
-  if (sleep_periods & 16) sleep(WDTO_250MS,SLEEP_MODE_PWR_DOWN);
-  if (sleep_periods & 8) sleep(WDTO_120MS,SLEEP_MODE_PWR_DOWN);
-  if (sleep_periods & 4) sleep(WDTO_60MS,SLEEP_MODE_PWR_DOWN);
-  if (sleep_periods & 2) sleep(WDTO_30MS,SLEEP_MODE_PWR_DOWN);
-  if (sleep_periods & 1) sleep(WDTO_15MS,SLEEP_MODE_PWR_DOWN);
 }
+
+void NarcolepticClass::calibrate() {
+  // Calibration needs Timer 1. Ensure it is powered up.
+  uint8_t PRRcopy = PRR;
+  PRR &= ~_BV(PRTIM1);
+  
+  uint8_t TCCR1Bcopy = TCCR1B;
+  TCCR1B &= ~(_BV(CS12) | _BV(CS11) | _BV(CS10)); // Stop clock immediately
+  // Capture Timer 1 state
+  uint8_t TCCR1Acopy = TCCR1A;
+  uint16_t TCNT1copy = TCNT1;
+  uint16_t OCR1Acopy = OCR1A;
+  uint16_t OCR1Bcopy = OCR1B;
+  uint16_t ICR1copy = ICR1;
+  uint8_t TIMSK1copy = TIMSK1;
+  uint8_t TIFR1copy = TIFR1;
+
+  // Configure as simple count-up timer
+  TCCR1A = 0;
+  TCCR1B = 0;
+  TCNT1 = 0;
+  TIMSK1 = 0;
+  TIFR1 = 0;
+  // Set clock to /64 (should take 15625 cycles at 16MHz clock)
+  TCCR1B = _BV(CS11) | _BV(CS10);
+  sleep(WDTO_15MS,SLEEP_MODE_IDLE);
+  uint16_t watchdogDuration = TCNT1;
+  TCCR1B = 0; // Stop clock immediately
+
+  // Restore Timer 1
+  TIFR1 = TIFR1copy;
+  TIMSK1 = TIMSK1copy;
+  ICR1 = ICR1copy;
+  OCR1B = OCR1Bcopy;
+  OCR1A = OCR1Acopy;
+  TCNT1 = TCNT1copy;
+  TCCR1A = TCCR1Acopy;
+  TCCR1B = TCCR1Bcopy;
+
+  // Restore power reduction state
+  PRR = PRRcopy;
+  
+  watchdogTime_us = watchdogDuration * (64 * 1000000 / F_CPU);
+}
+
+uint32_t NarcolepticClass::millis() {
+  return millisCounter;
+}
+
 
 void NarcolepticClass::disableWire() {
   PRR |= _BV(PRTWI);
@@ -221,44 +279,6 @@ void NarcolepticClass::enableADC() {
 }
 void NarcolepticClass::enableSPI() {
   PRR &= ~_BV(PRSPI);
-}
-
-uint32_t NarcolepticClass::calibrate() {
-  uint8_t TCCR1Bcopy = TCCR1B;
-  TCCR1B &= ~(_BV(CS12) | _BV(CS11) | _BV(CS10)); // Stop clock immediately
-  // Capture Timer 1 state
-  uint8_t TCCR1Acopy = TCCR1A;
-  uint16_t TCNT1copy = TCNT1;
-  uint16_t OCR1Acopy = OCR1A;
-  uint16_t OCR1Bcopy = OCR1B;
-  uint16_t ICR1copy = ICR1;
-  uint8_t TIMSK1copy = TIMSK1;
-  uint8_t TIFR1copy = TIFR1;
-
-  // Configure as simple count-up timer
-  TCCR1A = 0;
-  TCCR1B = 0;
-  TCNT1 = 0;
-  TIMSK1 = 0;
-  TIFR1 = 0;
-  // Set clock to /64 (should take 15625 cycles at 16MHz clock)
-  TCCR1B = _BV(CS11) | _BV(CS10);
-  sleep(WDTO_15MS,SLEEP_MODE_IDLE);
-  uint16_t watchdogDuration = TCNT1;
-  TCCR1B = 0; // Stop clock immediately
-
-  // Restore Timer 1
-  TIFR1 = TIFR1copy;
-  TIMSK1 = TIMSK1copy;
-  ICR1 = ICR1copy;
-  OCR1B = OCR1Bcopy;
-  OCR1A = OCR1Acopy;
-  TCNT1 = TCNT1copy;
-  TCCR1A = TCCR1Acopy;
-  TCCR1B = TCCR1Bcopy;
-  
-  watchdogTime_us = watchdogDuration * (64 * 1000000 / F_CPU);
-  return watchdogTime_us;
 }
 
 NarcolepticClass Narcoleptic;
