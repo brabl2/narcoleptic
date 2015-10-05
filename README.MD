@@ -51,9 +51,9 @@ These are:</b>
   -  PWM outputs
   -  millis() ticker
   -  All timer activity
-  
+
   Narcoleptic is best used when nothing is going on anyway, to simulate a power-off
   state.
-  
+
   In a well optimised circuit, Narcoleptic can run for several years off
   a couple of AAA batteries.
