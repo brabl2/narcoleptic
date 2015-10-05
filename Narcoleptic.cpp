@@ -25,7 +25,9 @@
 #include <avr/sleep.h>
 #include "Narcoleptic.h"
 
+#if NARCOLEPTIC_CALIBRATION_ENABLE
 uint32_t watchdogTime_us = 16000;
+#endif
 uint32_t millisCounter = 0;
 
 SIGNAL(WDT_vect) {
@@ -106,8 +108,8 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
 #endif
   
   sei();
-  sleep_mode();
-  wdt_disable();
+  sleep_mode();            // here the device is actually put to sleep!!
+  wdt_disable();           // first thing after waking from sleep: disable watchdog...
 
   // Reenable all interrupts
 #ifdef SPMCSR
@@ -163,15 +165,19 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
 }
 
 
-void NarcolepticClass::delay(int milliseconds) {
+void NarcolepticClass::delay(uint32_t milliseconds) {
   millisCounter += milliseconds;
+#if NARCOLEPTIC_CALIBRATION_ENABLE
   uint32_t microseconds = milliseconds * 1000L;
   
   calibrate();
   microseconds -= watchdogTime_us;
   
   if (microseconds > 0) {
-    uint16_t sleep_periods = microseconds / watchdogTime_us;
+    uint32_t sleep_periods = microseconds / watchdogTime_us;
+#else
+    uint32_t sleep_periods = milliseconds / 16;
+#endif
     while (sleep_periods >= 512) {
       sleep(WDTO_8S,SLEEP_MODE_PWR_DOWN);
       sleep_periods -= 512;
@@ -185,9 +191,12 @@ void NarcolepticClass::delay(int milliseconds) {
     if (sleep_periods & 4) sleep(WDTO_60MS,SLEEP_MODE_PWR_DOWN);
     if (sleep_periods & 2) sleep(WDTO_30MS,SLEEP_MODE_PWR_DOWN);
     if (sleep_periods & 1) sleep(WDTO_15MS,SLEEP_MODE_PWR_DOWN);
+#if NARCOLEPTIC_CALIBRATION_ENABLE
   }
+#endif
 }
 
+#if NARCOLEPTIC_CALIBRATION_ENABLE
 void NarcolepticClass::calibrate() {
   // Calibration needs Timer 1. Ensure it is powered up.
   uint8_t PRRcopy = PRR;
@@ -210,7 +219,7 @@ void NarcolepticClass::calibrate() {
   TCNT1 = 0;
   TIMSK1 = 0;
   TIFR1 = 0;
-  // Set clock to /64 (should take 15625 cycles at 16MHz clock)
+  // Set clock to /64 (16ms should take approx. 4000 cycles at 16MHz clock)
   TCCR1B = _BV(CS11) | _BV(CS10);
   sleep(WDTO_15MS,SLEEP_MODE_IDLE);
   uint16_t watchdogDuration = TCNT1;
@@ -229,8 +238,9 @@ void NarcolepticClass::calibrate() {
   // Restore power reduction state
   PRR = PRRcopy;
   
-  watchdogTime_us = watchdogDuration * (64 * 1000000 / F_CPU);
+  watchdogTime_us = watchdogDuration * (64 * 1000000 / F_CPU); // should be approx. 16000
 }
+#endif
 
 uint32_t NarcolepticClass::millis() {
   return millisCounter;

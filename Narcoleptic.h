@@ -22,10 +22,12 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+#define NARCOLEPTIC_CALIBRATION_ENABLE 0
+
 class NarcolepticClass
 {
   public:
-    void delay(int milliseconds);
+    void delay(uint32_t milliseconds);
     uint32_t millis();
 
     void disableWire();
