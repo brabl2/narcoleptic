@@ -40,7 +40,8 @@
 #define BUTTON 2
 
 void setup() {
-  pinMode(BUTTON,INPUT_PULLUP);
+  pinMode(BUTTON,INPUT);
+  digitalWrite(BUTTON,HIGH);  
   pinMode(LED,OUTPUT);
   digitalWrite(LED,LOW);
 
