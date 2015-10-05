@@ -1,18 +1,14 @@
-<b>Narcoleptic uses some features of the microcontroller to reduce power consumption.</b>
-
-These are:
+<b>Narcoleptic uses some features of the microcontroller to reduce power consumption.
+These are:</b>
 
   <b>Sleep mode:</b>
-
     Freezes all microcontroller functions to dramatically reduce power.
     
   <b>128kHz internal oscillator:</b>
-
     This is a very low power oscillator, used to inform the microcontroller when to
     wake up.
 
   <b>Power reduction:</b>
-    
     Unused microcontroller functions can be powered down to save additional power.
 
 
@@ -51,10 +47,10 @@ These are:
 
 <b>Narcoleptic gotchas:</b>
   When doing a Narcoleptic.delay(), the following systems are frozen:
-    Serial communication
-    PWM outputs
-    millis() ticker
-    All timer activity
+  -  Serial communication
+  -  PWM outputs
+  -  millis() ticker
+  -  All timer activity
   
   Narcoleptic is best used when nothing is going on anyway, to simulate a power-off
   state.
