@@ -36,12 +36,14 @@
 
 #include <Narcoleptic.h>
 
+#define LED 13
+#define BUTTON 2
+
 void setup() {
-  pinMode(2,INPUT);
-  digitalWrite(2,HIGH);
-  pinMode(13,OUTPUT);
-  digitalWrite(13,LOW);
-  
+  pinMode(BUTTON,INPUT_PULLUP);
+  pinMode(LED,OUTPUT);
+  digitalWrite(LED,LOW);
+
   // Narcoleptic.disableMillis(); Do not disable millis - we need it for our delay() function.
   Narcoleptic.disableTimer1();
   Narcoleptic.disableTimer2();
@@ -52,20 +54,19 @@ void setup() {
 }
 
 void loop() {
-  int a;
 
   // Merlin the cat is snoozing... Connect digital pin 2 to ground to wake him up.
   Narcoleptic.delay(500); // During this time power consumption is minimised
 
-  while (digitalRead(2) == LOW) {
+  while (digitalRead(BUTTON) == LOW) {
     // Wake up CPU. Unfortunately, Merlin does not like waking up.
 
     // Swipe claws left
-    digitalWrite(13,HIGH);
+    digitalWrite(LED,HIGH);
     delay(50);
     
     // Swipe claws right
-    digitalWrite(13,LOW);
+    digitalWrite(LED,LOW);
     delay(50);
   }
 
