@@ -176,9 +176,8 @@ void NarcolepticClass::delay(uint32_t milliseconds) {
   uint32_t microseconds = milliseconds * 1000L;
   
   calibrate();
-  microseconds -= watchdogTime_us;
-  
-  if (microseconds > 0) {
+ if (microseconds > watchdogTime_us) {
+    microseconds -= watchdogTime_us; 
     uint32_t sleep_periods = microseconds / watchdogTime_us;
 #else
     uint32_t sleep_periods = milliseconds / 16;
