@@ -1,18 +1,18 @@
-Narcoleptic uses some features of the microcontroller to reduce power consumption.
-These are:
+<b>Narcoleptic uses some features of the microcontroller to reduce power consumption.
+These are:</b>
 
-  Sleep mode:
+  <b>Sleep mode:</b>
     Freezes all microcontroller functions to dramatically reduce power.
     
-  128kHz internal oscillator:
+  <b>128kHz internal oscillator:</b>
     This is a very low power oscillator, used to inform the microcontroller when to
     wake up.
 
-  Power reduction:
+  <b>Power reduction:</b>
     Unused microcontroller functions can be powered down to save additional power.
 
 
-Power saving tips:
+<b>Power saving tips:</b>
   Narcoleptic only reduces the current used by the microcontroller. It does not
     reduce the current of anything connected to it.
   A power-on LED can use 20mA.
@@ -25,7 +25,7 @@ Power saving tips:
     and only turning them on when you need them.
   The Atmel ATmega328P data sheet has a section on "Minimising Power Consumption".
 
-Narcoleptic tricks:
+<b>Narcoleptic tricks:</b>
   The 128kHz oscillator is not very accurate. It drifts by ±4.5% over the full
   voltage and temperature ranges. Narcoleptic measures its speed against the main
   clock, and bases all its timings on the corrected value. Provided the operating
@@ -35,7 +35,7 @@ Narcoleptic tricks:
   125, 62, 31 and 15ms. Narcoleptic performs multiple sleeps to achieve the requested
   timing.
 
-Keeping track of time:
+<b>Keeping track of time:</b>
   Narcoleptic shuts down almost everything - even the millis() counting routine.
   To get around this, Narcoleptic keeps track of the time in sleep mode.
   
@@ -45,15 +45,15 @@ Keeping track of time:
   your timing calculations will take into account the time in sleep mode.
 
 
-Narcoleptic gotchas:
+<b>Narcoleptic gotchas:</b>
   When doing a Narcoleptic.delay(), the following systems are frozen:
-    Serial communication
-    PWM outputs
-    millis() ticker
-    All timer activity
-  
+  -  Serial communication
+  -  PWM outputs
+  -  millis() ticker
+  -  All timer activity
+
   Narcoleptic is best used when nothing is going on anyway, to simulate a power-off
   state.
-  
+
   In a well optimised circuit, Narcoleptic can run for several years off
   a couple of AAA batteries.
