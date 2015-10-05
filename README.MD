@@ -1,14 +1,18 @@
 <b>Narcoleptic uses some features of the microcontroller to reduce power consumption.</b>
+
 These are:
 
   <b>Sleep mode:</b>
+
     Freezes all microcontroller functions to dramatically reduce power.
     
   <b>128kHz internal oscillator:</b>
+
     This is a very low power oscillator, used to inform the microcontroller when to
     wake up.
 
   <b>Power reduction:</b>
+    
     Unused microcontroller functions can be powered down to save additional power.
 
 
