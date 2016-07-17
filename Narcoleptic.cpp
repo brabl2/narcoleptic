@@ -25,9 +25,7 @@
 #include <avr/sleep.h>
 #include "Narcoleptic.h"
 
-#if NARCOLEPTIC_CALIBRATION_ENABLE
 uint32_t watchdogTime_us = 16000;
-#endif
 uint32_t millisCounter = 0;
 
 SIGNAL(WDT_vect) {
@@ -171,17 +169,24 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
 
 
 void NarcolepticClass::delay(uint32_t milliseconds) {
+  uint32_t microseconds;
   millisCounter += milliseconds;
-#if NARCOLEPTIC_CALIBRATION_ENABLE
-  uint32_t microseconds = milliseconds * 1000L;
-  
-  calibrate();
- if (microseconds > watchdogTime_us) {
-    microseconds -= watchdogTime_us; 
+  do { // iteration to cope with very large delay values
+    if (milliseconds >= 1<<22) { //delay larger than 4.194.304 millis (more than 1 hour)
+      milliseconds -= 1<<22;
+      microseconds = 1<<22*1000; // this value can fit uint32_t
+    }
+    else {
+      microseconds=milliseconds*1000;
+      milliseconds=0;
+    }
+    microseconds = milliseconds * 1000L;
+    if (microseconds > (watchdogTime_us<<1)){ //no calibration for small periods
+      calibrate();
+      microseconds -= watchdogTime_us;
+    }
     uint32_t sleep_periods = microseconds / watchdogTime_us;
-#else
-    uint32_t sleep_periods = milliseconds / 16;
-#endif
+  
     while (sleep_periods >= 512) {
       sleep(WDTO_8S,SLEEP_MODE_PWR_DOWN);
       sleep_periods -= 512;
@@ -195,12 +200,9 @@ void NarcolepticClass::delay(uint32_t milliseconds) {
     if (sleep_periods & 4) sleep(WDTO_60MS,SLEEP_MODE_PWR_DOWN);
     if (sleep_periods & 2) sleep(WDTO_30MS,SLEEP_MODE_PWR_DOWN);
     if (sleep_periods & 1) sleep(WDTO_15MS,SLEEP_MODE_PWR_DOWN);
-#if NARCOLEPTIC_CALIBRATION_ENABLE
-  }
-#endif
+  } while (milliseconds > 0);
 }
 
-#if NARCOLEPTIC_CALIBRATION_ENABLE
 void NarcolepticClass::calibrate() {
   // Calibration needs Timer 1. Ensure it is powered up.
   uint8_t PRRcopy = PRR;
@@ -244,7 +246,7 @@ void NarcolepticClass::calibrate() {
   
   watchdogTime_us = watchdogDuration * (64 * 1000000 / F_CPU); // should be approx. 16000
 }
-#endif
+
 
 uint32_t NarcolepticClass::millis() {
   return millisCounter;
