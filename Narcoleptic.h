@@ -22,7 +22,6 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#define NARCOLEPTIC_CALIBRATION_ENABLE 0
 
 class NarcolepticClass
 {
