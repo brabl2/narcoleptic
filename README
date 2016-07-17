@@ -44,7 +44,9 @@ Keeping track of time:
 
   your timing calculations will take into account the time in sleep mode.
 
-
+Manages very small and very large delays:
+delays between 1ms and 30ms are executed without calibration, but using the last known value of watchdogTime_us
+delays up to more than 1000h are correctly managed.
 Narcoleptic gotchas:
   When doing a Narcoleptic.delay(), the following systems are frozen:
     Serial communication
