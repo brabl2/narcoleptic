@@ -172,12 +172,12 @@ void NarcolepticClass::delay(uint32_t milliseconds) {
   uint32_t microseconds;
   millisCounter += milliseconds;
   do { // iteration to cope with very large delay values
-    if (milliseconds >= 1<<22) { //delay larger than 4.194.304 millis (more than 1 hour)
-      milliseconds -= 1<<22;
-      microseconds = 1<<22*1000; // this value can fit uint32_t
+    if (milliseconds >= 1L<<22) { //delay larger than 4.194.304 millis (more than 1 hour)
+      milliseconds -= 1L<<22;
+      microseconds = 1L<<22*1000; // this value can fit uint32_t
     }
     else {
-      microseconds=milliseconds*1000;
+      microseconds=milliseconds*1000L;
       milliseconds=0;
     }
     microseconds = milliseconds * 1000L;
