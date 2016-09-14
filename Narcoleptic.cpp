@@ -180,7 +180,6 @@ void NarcolepticClass::delay(uint32_t milliseconds) {
       microseconds=milliseconds*1000L;
       milliseconds=0;
     }
-    microseconds = milliseconds * 1000L;
     if (microseconds >= 20000){ //no calibration for small periods
       calibrate();
       microseconds -= watchdogTime_us;
