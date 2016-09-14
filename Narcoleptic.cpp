@@ -186,7 +186,7 @@ void NarcolepticClass::delay(uint32_t milliseconds) {
       microseconds -= watchdogTime_us;
     }
     uint32_t sleep_periods = microseconds / watchdogTime_us;
-  
+    delay(microseconds % watchdogTime_us); // residual fraction of time smaller than minimum sleep time
     while (sleep_periods >= 512) {
       sleep(WDTO_8S,SLEEP_MODE_PWR_DOWN);
       sleep_periods -= 512;
