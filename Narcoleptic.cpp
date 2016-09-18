@@ -24,6 +24,7 @@
 #include <avr/wdt.h>
 #include <avr/sleep.h>
 #include "Narcoleptic.h"
+#include "Arduino.h"
 
 uint32_t watchdogTime_us = 16000;
 uint32_t millisCounter = 0;
@@ -171,10 +172,10 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
 void NarcolepticClass::delay(uint32_t milliseconds) {
   uint32_t microseconds;
   millisCounter += milliseconds;
-  do { // iteration to cope with very large delay values
-    if (milliseconds >= 1L<<22) { //delay larger than 4.194.304 millis (more than 1 hour)
-      milliseconds -= 1L<<22;
-      microseconds = 1L<<22*1000; // this value can fit uint32_t
+  do { // iteration to cope with very large delay values - more than 1 week
+	if (milliseconds >= 1L<<22) { //delay larger than 4.194.304 millis (more than 1 hour) 
+	  milliseconds -= 1L<<22;
+	  microseconds =(1L<<22)*1000L; // this value can fit uint32_t
     }
     else {
       microseconds=milliseconds*1000L;
@@ -185,7 +186,7 @@ void NarcolepticClass::delay(uint32_t milliseconds) {
       microseconds -= watchdogTime_us;
     }
     uint32_t sleep_periods = microseconds / watchdogTime_us;
-    delay(microseconds % watchdogTime_us); // residual fraction of time smaller than minimum sleep time
+	
     while (sleep_periods >= 512) {
       sleep(WDTO_8S,SLEEP_MODE_PWR_DOWN);
       sleep_periods -= 512;
@@ -200,6 +201,9 @@ void NarcolepticClass::delay(uint32_t milliseconds) {
     if (sleep_periods & 2) sleep(WDTO_30MS,SLEEP_MODE_PWR_DOWN);
     if (sleep_periods & 1) sleep(WDTO_15MS,SLEEP_MODE_PWR_DOWN);
   } while (milliseconds > 0);
+  delayMicroseconds((unsigned int) (microseconds % watchdogTime_us));
+  //remaining delay of less than 15ms is generated with delayMicroseconds()
+  
 }
 
 void NarcolepticClass::calibrate() {
@@ -248,6 +252,7 @@ void NarcolepticClass::calibrate() {
 
 
 uint32_t NarcolepticClass::millis() {
+  
   return millisCounter;
 }
 
