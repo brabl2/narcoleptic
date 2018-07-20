@@ -1,3 +1,5 @@
+This is a fork of doc62's modified fork of brable2's original Narcoleptic. It adds support for the ATmega328pb processor with its PRR0 and PRR1 registers.
+
 Narcoleptic uses some features of the microcontroller to reduce power consumption.
 These are:
 

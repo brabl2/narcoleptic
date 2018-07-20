@@ -1,0 +1,22 @@
+{
+    "name": "Narcoleptic",
+    "version": "1.0.0",
+    "keywords": "low power sleep",
+    "description": "Sleep library for Arduino",
+    "authors":
+    {
+        "name": "brabl2, doc62",
+        "email": "",
+        "url": "https://github.com/doc62/narcoleptic"
+    },
+    "export": {
+      "include": ""
+    },
+    "repository":
+    {
+        "type": "git",
+        "url": "https://github.com/doc62/narcoleptic.git"
+    },
+    "frameworks": "arduino",
+    "platforms": "*"
+}

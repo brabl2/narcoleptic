@@ -23,6 +23,11 @@
 
 #include <avr/wdt.h>
 #include <avr/sleep.h>
+
+#if !defined(PRR) && defined(PRR0)
+#define PRR PRR0
+#endif
+
 #include "Narcoleptic.h"
 #include "Arduino.h"
 
