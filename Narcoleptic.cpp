@@ -259,24 +259,69 @@ void NarcolepticClass::disableWire() {
 #ifdef PRTWI
   PRR |= _BV(PRTWI);
 #endif
+#ifdef PRTWI0
+  PRR0 |= _BV(PRTWI0);
+#endif
+#ifdef PRTWI1
+  PRR1 |= _BV(PRTWI1);
+#endif
 #ifdef PRUSI
   PRR |= _BV(PRUSI);
 #endif
+}
+void NarcolepticClass::disableWire0() {
+#ifdef PRTWI0
+  PRR0 |= _BV(PRTWI0);
+#endif
+}
+void NarcolepticClass::disableWire1() {
+#ifdef PRTWI1
+  PRR1 |= _BV(PRTWI1);
+#endif
+}
+void NarcolepticClass::disableMillis() {
+  PRR |= _BV(PRTIM0);
+}
+void NarcolepticClass::disableTimer1() {
+  PRR |= _BV(PRTIM1);
 }
 void NarcolepticClass::disableTimer2() {
 #ifdef PRTIM2
   PRR |= _BV(PRTIM2);
 #endif
 }
-void NarcolepticClass::disableTimer1() {
-  PRR |= _BV(PRTIM1);
+void NarcolepticClass::disableTimer3() {
+#ifdef PRTIM3
+  PRR1 |= _BV(PRTIM3);
+#endif
 }
-void NarcolepticClass::disableMillis() {
-  PRR |= _BV(PRTIM0);
+void NarcolepticClass::disableTimer4() {
+#ifdef PRTIM4
+  PRR1 |= _BV(PRTIM4);
+#endif
 }
 void NarcolepticClass::disableSerial() {
 #ifdef PRUSART0
   PRR |= _BV(PRUSART0);
+#endif
+#ifdef PRUSART1
+  PRR |= _BV(PRUSART1);
+#endif
+#ifdef PRUSART
+  PRR |= _BV(PRUSART);
+#endif
+}
+void NarcolepticClass::disableSerial0() {
+#ifdef PRUSART0
+  PRR |= _BV(PRUSART0);
+#endif
+#ifdef PRUSART
+  PRR |= _BV(PRUSART);
+#endif
+}
+void NarcolepticClass::disableSerial1() {
+#ifdef PRUSART1
+  PRR |= _BV(PRUSART1);
 #endif
 #ifdef PRUSART
   PRR |= _BV(PRUSART);
@@ -291,26 +336,74 @@ void NarcolepticClass::disableSPI() {
 #ifdef PRSPI
   PRR |= _BV(PRSPI);
 #endif
+#ifdef PRSPI0
+  PRR0 |= _BV(PRSPI0);
+#endif
+#ifdef PRSPI1
+  PRR1 |= _BV(PRSPI1);
+#endif
+}
+
+void NarcolepticClass::disableSPI0() {
+#ifdef PRSPI0
+  PRR0 |= _BV(PRSPI0);
+#endif
+}
+void NarcolepticClass::disableSPI1() {
+#ifdef PRSPI1
+  PRR1 |= _BV(PRSPI1);
+#endif
+}
+void NarcolepticClass::disableTouch() {
+#ifdef PRPTC
+  PRR1 |= _BV(PRPTC);
+#endif
 }
 
 void NarcolepticClass::enableWire() {
 #ifdef PRTWI
   PRR &= ~_BV(PRTWI);
 #endif
+#ifdef PRTWI0
+  PRR0 &= ~_BV(PRTWI0);
+#endif
+#ifdef PRTWI1
+  PRR1 &= ~_BV(PRTWI1);
+#endif
 #ifdef PRUSI
   PRR &= ~_BV(PRUSI);
 #endif
+}
+void NarcolepticClass::enableWire0() {
+#ifdef PRTWI0
+  PRR0 &= ~_BV(PRTWI0);
+#endif
+}
+void NarcolepticClass::enableWire1() {
+#ifdef PRTWI1
+  PRR1 &= ~_BV(PRTWI1);
+#endif
+}
+void NarcolepticClass::enableMillis() {
+  PRR &= ~_BV(PRTIM0);
+}
+void NarcolepticClass::enableTimer1() {
+  PRR &= ~_BV(PRTIM1);
 }
 void NarcolepticClass::enableTimer2() {
 #ifdef PRTIM2
   PRR &= ~_BV(PRTIM2);
 #endif
 }
-void NarcolepticClass::enableTimer1() {
-  PRR &= ~_BV(PRTIM1);
+void NarcolepticClass::enableTimer3() {
+#ifdef PRTIM3
+  PRR1 &= ~_BV(PRTIM3);
+#endif
 }
-void NarcolepticClass::enableMillis() {
-  PRR &= ~_BV(PRTIM0);
+void NarcolepticClass::enableTimer4() {
+#ifdef PRTIM4
+  PRR1 &= ~_BV(PRTIM4);
+#endif
 }
 void NarcolepticClass::enableSerial() {
 #ifdef PRUSART0
@@ -328,6 +421,27 @@ void NarcolepticClass::enableADC() {
 void NarcolepticClass::enableSPI() {
 #ifdef PRSPI
   PRR &= ~_BV(PRSPI);
+#endif
+#ifdef PRSPI0
+  PRR0 &= ~_BV(PRSPI0);
+#endif
+#ifdef PRSPI1
+  PRR1 &= ~_BV(PRSPI1);
+#endif
+}
+void NarcolepticClass::enableSPI0() {
+#ifdef PRSPI0
+  PRR0 &= ~_BV(PRSPI0);
+#endif
+}
+void NarcolepticClass::enableSPI1() {
+#ifdef PRSPI1
+  PRR1 &= ~_BV(PRSPI1);
+#endif
+}
+void NarcolepticClass::enableTouch() {
+#ifdef PRPTC
+  PRR1 &= ~_BV(PRPTC);
 #endif
 }
 

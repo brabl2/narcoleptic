@@ -24,6 +24,9 @@
 
 #define NARCOLEPTIC_CALIBRATION_ENABLE 0
 
+#define enableTimer0 enableMillis
+#define disableTimer0 disableMillis
+
 class NarcolepticClass
 {
   public:
@@ -31,20 +34,36 @@ class NarcolepticClass
     uint32_t millis();
 
     void disableWire();
-    void disableTimer2();
-    void disableTimer1();
+    void disableWire0();
+    void disableWire1();
     void disableMillis();
+    void disableTimer1();
+    void disableTimer2();
+    void disableTimer3();
+    void disableTimer4();
     void disableSerial();
+    void disableSerial0();
+    void disableSerial1();
     void disableADC();
     void disableSPI();
+    void disableSPI0();
+    void disableSPI1();
+    void disableTouch();
 
     void enableWire();
-    void enableTimer2();
-    void enableTimer1();
+    void enableWire0();
+    void enableWire1();
     void enableMillis();
+    void enableTimer1();
+    void enableTimer2();
+    void enableTimer3();
+    void enableTimer4();
     void enableSerial();
     void enableADC();
     void enableSPI();
+    void enableSPI0();
+    void enableSPI1();
+    void enableTouch();
 
   private:
     void sleep(uint8_t,uint8_t);
