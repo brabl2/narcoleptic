@@ -45,13 +45,6 @@ SIGNAL(WDT_vect) {
 }
 
 void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
-  
-#ifdef BODSE
-  // Turn off BOD in sleep (picopower devices only)
-  MCUCR |= _BV(BODSE);
-  MCUCR |= _BV(BODS);
-#endif
-
   MCUSR = 0;
 #ifdef WDTCSR
   WDTCSR &= ~_BV(WDE);
@@ -116,6 +109,11 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
   uint8_t SPMCSRcopy = SPMCSR; SPMCSR &= ~_BV(SPMIE);
 #endif
   
+#ifdef BODSE
+  // Turn off BOD in sleep (picopower devices only)
+  MCUCR |= _BV(BODSE);
+  MCUCR |= _BV(BODS);
+#endif
   sei();
   sleep_mode();            // here the device is actually put to sleep!!
   wdt_disable();           // first thing after waking from sleep: disable watchdog...
@@ -195,6 +193,7 @@ void NarcolepticClass::delay(uint32_t milliseconds) {
     while (sleep_periods >= 512) {
       sleep(WDTO_8S,SLEEP_MODE_PWR_DOWN);
       sleep_periods -= 512;
+      Serial.print(".");
     }
     if (sleep_periods & 256) sleep(WDTO_4S,SLEEP_MODE_PWR_DOWN);
     if (sleep_periods & 128) sleep(WDTO_2S,SLEEP_MODE_PWR_DOWN);
@@ -205,10 +204,10 @@ void NarcolepticClass::delay(uint32_t milliseconds) {
     if (sleep_periods & 4) sleep(WDTO_60MS,SLEEP_MODE_PWR_DOWN);
     if (sleep_periods & 2) sleep(WDTO_30MS,SLEEP_MODE_PWR_DOWN);
     if (sleep_periods & 1) sleep(WDTO_15MS,SLEEP_MODE_PWR_DOWN);
+    Serial.print("!");
   } while (milliseconds > 0);
   delayMicroseconds((unsigned int) (microseconds % watchdogTime_us));
   //remaining delay of less than 15ms is generated with delayMicroseconds()
-  
 }
 
 void NarcolepticClass::calibrate() {
@@ -335,6 +334,7 @@ void NarcolepticClass::disableSerial1() {
 #endif
 }
 void NarcolepticClass::disableADC() {
+  ADCSRA = 0; // ADC off
 #ifdef PRADC
   PRR |= _BV(PRADC);
 #endif
