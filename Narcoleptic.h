@@ -24,7 +24,7 @@
 
 #define enableTimer0 enableMillis
 #define disableTimer0 disableMillis
-
+#define NarcolepticVer "1.1.0"
 
 class NarcolepticClass
 {
@@ -40,6 +40,7 @@ class NarcolepticClass
     void disableTimer2();
     void disableTimer3();
     void disableTimer4();
+    void disableTimers();
     void disableSerial();
     void disableSerial0();
     void disableSerial1();
@@ -57,7 +58,10 @@ class NarcolepticClass
     void enableTimer2();
     void enableTimer3();
     void enableTimer4();
+    void enableTimers();
     void enableSerial();
+    void enableSerial0();
+    void enableSerial1();
     void enableADC();
     void enableSPI();
     void enableSPI0();

@@ -34,7 +34,8 @@
 uint32_t watchdogTime_us = 16000;
 uint32_t millisCounter = 0;
 
-SIGNAL(WDT_vect) {
+SIGNAL(WDT_vect)
+{
   wdt_disable();
   wdt_reset();
 #ifdef WDTCSR
@@ -44,7 +45,8 @@ SIGNAL(WDT_vect) {
 #endif
 }
 
-void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
+void NarcolepticClass::sleep(uint8_t wdt_period, uint8_t sleep_mode)
+{
   MCUSR = 0;
 #ifdef WDTCSR
   WDTCSR &= ~_BV(WDE);
@@ -53,7 +55,7 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
   WDTCR &= ~_BV(WDE);
   WDTCR = _BV(WDIF) | _BV(WDIE) | _BV(WDCE);
 #endif
-  
+
   wdt_enable(wdt_period);
   wdt_reset();
 #ifdef WDTCSR
@@ -62,61 +64,73 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
   WDTCR |= _BV(WDIE);
 #endif
   set_sleep_mode(sleep_mode);
+  sleep_enable();
 
   // Disable all interrupts
-  uint8_t SREGcopy = SREG; cli();
+  uint8_t SREGcopy = SREG;
+  cli();
 
 #ifdef EECR
-  uint8_t EECRcopy = EECR; EECR &= ~_BV(EERIE);
+  uint8_t EECRcopy = EECR;
+  EECR &= ~_BV(EERIE);
 #endif
 #ifdef EIMSK
-  uint8_t EIMSKcopy = EIMSK; EIMSK = 0;
+  uint8_t EIMSKcopy = EIMSK;
+  EIMSK = 0;
 #endif
 #ifdef PCMSK0
-  uint8_t PCMSK0copy = PCMSK0; PCMSK0 = 0;
+  uint8_t PCMSK0copy = PCMSK0;
+  PCMSK0 = 0;
 #endif
 #ifdef PCMSK1
-  uint8_t PCMSK1copy = PCMSK1; PCMSK1 = 0;
+  uint8_t PCMSK1copy = PCMSK1;
+  PCMSK1 = 0;
 #endif
 #ifdef PCMSK2
-  uint8_t PCMSK2copy = PCMSK2; PCMSK2 = 0;
+  uint8_t PCMSK2copy = PCMSK2;
+  PCMSK2 = 0;
 #endif
 #ifdef TIMSK0
-  uint8_t TIMSK0copy = TIMSK0; TIMSK0 = 0;
+  uint8_t TIMSK0copy = TIMSK0;
+  TIMSK0 = 0;
 #endif
 #ifdef TIMSK1
-  uint8_t TIMSK1copy = TIMSK1; TIMSK1 = 0;
+  uint8_t TIMSK1copy = TIMSK1;
+  TIMSK1 = 0;
 #endif
 #ifdef TIMSK2
-  uint8_t TIMSK2copy = TIMSK2; TIMSK2 = 0;
+  uint8_t TIMSK2copy = TIMSK2;
+  TIMSK2 = 0;
 #endif
 #ifdef SPCR
-  uint8_t SPCRcopy = SPCR; SPCR &= ~_BV(SPIE);
+  uint8_t SPCRcopy = SPCR;
+  SPCR &= ~_BV(SPIE);
 #endif
 #ifdef UCSR0B
-  uint8_t UCSR0Bcopy = UCSR0B; UCSR0B &= ~(_BV(RXCIE0) | _BV(TXCIE0) | _BV(UDRIE0));
+  uint8_t UCSR0Bcopy = UCSR0B;
+  UCSR0B &= ~(_BV(RXCIE0) | _BV(TXCIE0) | _BV(UDRIE0));
 #endif
 #ifdef TWCR
-  uint8_t TWCRcopy = TWCR; TWCR &= ~_BV(TWIE);
+  uint8_t TWCRcopy = TWCR;
+  TWCR &= ~_BV(TWIE);
 #endif
 #ifdef ACSR
-  uint8_t ACSRcopy = ACSR; ACSR &= ~_BV(ACIE);
+  uint8_t ACSRcopy = ACSR;
+  ACSR &= ~_BV(ACIE);
 #endif
 #ifdef ADCSRA
-  uint8_t ADCSRAcopy = ADCSRA; ADCSRA &= ~_BV(ADIE);
+  uint8_t ADCSRAcopy = ADCSRA;
+  ADCSRA &= ~_BV(ADIE);
 #endif
 #if defined(SPMCSR) && defined(SPMIE)
-  uint8_t SPMCSRcopy = SPMCSR; SPMCSR &= ~_BV(SPMIE);
+  uint8_t SPMCSRcopy = SPMCSR;
+  SPMCSR &= ~_BV(SPMIE);
 #endif
-  
-#ifdef BODSE
-  // Turn off BOD in sleep (picopower devices only)
-  MCUCR |= _BV(BODSE);
-  MCUCR |= _BV(BODS);
-#endif
+
+  sleep_bod_disable();
   sei();
-  sleep_mode();            // here the device is actually put to sleep!!
-  wdt_disable();           // first thing after waking from sleep: disable watchdog...
+  sleep_cpu();  // here the device is actually put to sleep!!
+  sleep_disable(); /* First thing to do is disable sleep. */
 
   // Reenable all interrupts
 #if defined(SPMCSR) && defined(SPMIE)
@@ -163,7 +177,7 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
 #endif
 
   SREG = SREGcopy;
-  
+
 #ifdef WDTCSR
   WDTCSR &= ~_BV(WDIE);
 #else
@@ -171,50 +185,63 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
 #endif
 }
 
-
-void NarcolepticClass::delay(uint32_t milliseconds) {
+void NarcolepticClass::delay(uint32_t milliseconds)
+{
   uint32_t microseconds;
   millisCounter += milliseconds;
-  do { // iteration to cope with very large delay values - more than 1 week
-	if (milliseconds >= 1L<<22) { //delay larger than 4.194.304 millis (more than 1 hour) 
-	  milliseconds -= 1L<<22;
-	  microseconds =(1L<<22)*1000L; // this value can fit uint32_t
+  do
+  { // iteration to cope with very large delay values - more than 1 week
+    if (milliseconds >= 1L << 22)
+    { //delay larger than 4.194.304 millis (more than 1 hour)
+      milliseconds -= 1L << 22;
+      microseconds = (1L << 22) * 1000L; // this value can fit uint32_t
     }
-    else {
-      microseconds=milliseconds*1000L;
-      milliseconds=0;
+    else
+    {
+      microseconds = milliseconds * 1000L;
+      milliseconds = 0;
     }
-    if (microseconds >= 20000){ //no calibration for small periods
+    if (microseconds >= 20000)
+    { //no calibration for small periods
       calibrate();
       microseconds -= watchdogTime_us;
     }
     uint32_t sleep_periods = microseconds / watchdogTime_us;
-	
-    while (sleep_periods >= 512) {
-      sleep(WDTO_8S,SLEEP_MODE_PWR_DOWN);
+
+    while (sleep_periods >= 512)
+    {
+      sleep(WDTO_8S, SLEEP_MODE_PWR_DOWN);
       sleep_periods -= 512;
-      Serial.print(".");
     }
-    if (sleep_periods & 256) sleep(WDTO_4S,SLEEP_MODE_PWR_DOWN);
-    if (sleep_periods & 128) sleep(WDTO_2S,SLEEP_MODE_PWR_DOWN);
-    if (sleep_periods & 64) sleep(WDTO_1S,SLEEP_MODE_PWR_DOWN);
-    if (sleep_periods & 32) sleep(WDTO_500MS,SLEEP_MODE_PWR_DOWN);
-    if (sleep_periods & 16) sleep(WDTO_250MS,SLEEP_MODE_PWR_DOWN);
-    if (sleep_periods & 8) sleep(WDTO_120MS,SLEEP_MODE_PWR_DOWN);
-    if (sleep_periods & 4) sleep(WDTO_60MS,SLEEP_MODE_PWR_DOWN);
-    if (sleep_periods & 2) sleep(WDTO_30MS,SLEEP_MODE_PWR_DOWN);
-    if (sleep_periods & 1) sleep(WDTO_15MS,SLEEP_MODE_PWR_DOWN);
-    Serial.print("!");
+    if (sleep_periods & 256)
+      sleep(WDTO_4S, SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 128)
+      sleep(WDTO_2S, SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 64)
+      sleep(WDTO_1S, SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 32)
+      sleep(WDTO_500MS, SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 16)
+      sleep(WDTO_250MS, SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 8)
+      sleep(WDTO_120MS, SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 4)
+      sleep(WDTO_60MS, SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 2)
+      sleep(WDTO_30MS, SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 1)
+      sleep(WDTO_15MS, SLEEP_MODE_PWR_DOWN);
   } while (milliseconds > 0);
-  delayMicroseconds((unsigned int) (microseconds % watchdogTime_us));
+  delayMicroseconds((unsigned int)(microseconds % watchdogTime_us));
   //remaining delay of less than 15ms is generated with delayMicroseconds()
 }
 
-void NarcolepticClass::calibrate() {
+void NarcolepticClass::calibrate()
+{
   // Calibration needs Timer 1. Ensure it is powered up.
   uint8_t PRRcopy = PRR;
   PRR &= ~_BV(PRTIM1);
-  
+
   uint8_t TCCR1Bcopy = TCCR1B;
   TCCR1B &= ~(_BV(CS12) | _BV(CS11) | _BV(CS10)); // Stop clock immediately
   // Capture Timer 1 state
@@ -234,7 +261,7 @@ void NarcolepticClass::calibrate() {
   TIFR1 = 0;
   // Set clock to /64 (16ms should take approx. 4000 cycles at 16MHz clock)
   TCCR1B = _BV(CS11) | _BV(CS10);
-  sleep(WDTO_15MS,SLEEP_MODE_IDLE);
+  sleep(WDTO_15MS, SLEEP_MODE_IDLE);
   uint16_t watchdogDuration = TCNT1;
   TCCR1B = 0; // Stop clock immediately
 
@@ -250,18 +277,17 @@ void NarcolepticClass::calibrate() {
 
   // Restore power reduction state
   PRR = PRRcopy;
-  
+
   watchdogTime_us = watchdogDuration * (64 * 1000000 / F_CPU); // should be approx. 16000
 }
 
-
-uint32_t NarcolepticClass::millis() {
-  
+uint32_t NarcolepticClass::millis()
+{
   return millisCounter;
 }
 
-
-void NarcolepticClass::disableWire() {
+void NarcolepticClass::disableWire()
+{
 #ifdef PRTWI
   PRR |= _BV(PRTWI);
 #endif
@@ -275,38 +301,59 @@ void NarcolepticClass::disableWire() {
   PRR |= _BV(PRUSI);
 #endif
 }
-void NarcolepticClass::disableWire0() {
+void NarcolepticClass::disableWire0()
+{
 #ifdef PRTWI0
   PRR0 |= _BV(PRTWI0);
 #endif
 }
-void NarcolepticClass::disableWire1() {
+void NarcolepticClass::disableWire1()
+{
 #ifdef PRTWI1
   PRR1 |= _BV(PRTWI1);
 #endif
 }
-void NarcolepticClass::disableMillis() {
+void NarcolepticClass::disableMillis()
+{
   PRR |= _BV(PRTIM0);
 }
-void NarcolepticClass::disableTimer1() {
+void NarcolepticClass::disableTimer1()
+{
   PRR |= _BV(PRTIM1);
 }
-void NarcolepticClass::disableTimer2() {
+void NarcolepticClass::disableTimer2()
+{
 #ifdef PRTIM2
   PRR |= _BV(PRTIM2);
 #endif
 }
-void NarcolepticClass::disableTimer3() {
+void NarcolepticClass::disableTimer3()
+{
 #ifdef PRTIM3
   PRR1 |= _BV(PRTIM3);
 #endif
 }
-void NarcolepticClass::disableTimer4() {
+void NarcolepticClass::disableTimer4()
+{
 #ifdef PRTIM4
   PRR1 |= _BV(PRTIM4);
 #endif
 }
-void NarcolepticClass::disableSerial() {
+void NarcolepticClass::disableTimers()
+{
+  PRR |= _BV(PRTIM1);
+#ifdef PRTIM2
+  PRR |= _BV(PRTIM2);
+#endif
+#ifdef PRTIM3
+  PRR1 |= _BV(PRTIM3);
+#endif
+#ifdef PRTIM4
+  PRR1 |= _BV(PRTIM4);
+#endif
+}
+void NarcolepticClass::disableSerial()
+{
 #ifdef PRUSART0
   PRR |= _BV(PRUSART0);
 #endif
@@ -317,15 +364,11 @@ void NarcolepticClass::disableSerial() {
   PRR |= _BV(PRUSART);
 #endif
 }
-void NarcolepticClass::disableSerial0() {
+void NarcolepticClass::disableSerial0()
+{
 #ifdef PRUSART0
   PRR |= _BV(PRUSART0);
 #endif
-#ifdef PRUSART
-  PRR |= _BV(PRUSART);
-#endif
-}
-void NarcolepticClass::disableSerial1() {
 #ifdef PRUSART1
   PRR |= _BV(PRUSART1);
 #endif
@@ -333,13 +376,24 @@ void NarcolepticClass::disableSerial1() {
   PRR |= _BV(PRUSART);
 #endif
 }
-void NarcolepticClass::disableADC() {
+void NarcolepticClass::disableSerial1()
+{
+#ifdef PRUSART1
+  PRR |= _BV(PRUSART1);
+#endif
+#ifdef PRUSART
+  PRR |= _BV(PRUSART);
+#endif
+}
+void NarcolepticClass::disableADC()
+{
   ADCSRA = 0; // ADC off
 #ifdef PRADC
   PRR |= _BV(PRADC);
 #endif
 }
-void NarcolepticClass::disableSPI() {
+void NarcolepticClass::disableSPI()
+{
 #ifdef PRSPI
   PRR |= _BV(PRSPI);
 #endif
@@ -351,23 +405,27 @@ void NarcolepticClass::disableSPI() {
 #endif
 }
 
-void NarcolepticClass::disableSPI0() {
+void NarcolepticClass::disableSPI0()
+{
 #ifdef PRSPI0
   PRR0 |= _BV(PRSPI0);
 #endif
 }
-void NarcolepticClass::disableSPI1() {
+void NarcolepticClass::disableSPI1()
+{
 #ifdef PRSPI1
   PRR1 |= _BV(PRSPI1);
 #endif
 }
-void NarcolepticClass::disableTouch() {
+void NarcolepticClass::disableTouch()
+{
 #ifdef PRPTC
   PRR1 |= _BV(PRPTC);
 #endif
 }
 
-void NarcolepticClass::enableWire() {
+void NarcolepticClass::enableWire()
+{
 #ifdef PRTWI
   PRR &= ~_BV(PRTWI);
 #endif
@@ -381,38 +439,67 @@ void NarcolepticClass::enableWire() {
   PRR &= ~_BV(PRUSI);
 #endif
 }
-void NarcolepticClass::enableWire0() {
+void NarcolepticClass::enableWire0()
+{
 #ifdef PRTWI0
   PRR0 &= ~_BV(PRTWI0);
 #endif
 }
-void NarcolepticClass::enableWire1() {
+void NarcolepticClass::enableWire1()
+{
 #ifdef PRTWI1
   PRR1 &= ~_BV(PRTWI1);
 #endif
 }
-void NarcolepticClass::enableMillis() {
+void NarcolepticClass::enableMillis()
+{
   PRR &= ~_BV(PRTIM0);
 }
-void NarcolepticClass::enableTimer1() {
+void NarcolepticClass::enableTimer1()
+{
   PRR &= ~_BV(PRTIM1);
 }
-void NarcolepticClass::enableTimer2() {
+void NarcolepticClass::enableTimer2()
+{
 #ifdef PRTIM2
   PRR &= ~_BV(PRTIM2);
 #endif
 }
-void NarcolepticClass::enableTimer3() {
+void NarcolepticClass::enableTimer3()
+{
 #ifdef PRTIM3
   PRR1 &= ~_BV(PRTIM3);
 #endif
 }
-void NarcolepticClass::enableTimer4() {
+void NarcolepticClass::enableTimer4()
+{
 #ifdef PRTIM4
   PRR1 &= ~_BV(PRTIM4);
 #endif
 }
-void NarcolepticClass::enableSerial() {
+void NarcolepticClass::enableTimers()
+{
+  PRR &= ~_BV(PRTIM1);
+#ifdef PRTIM2
+  PRR &= ~_BV(PRTIM2);
+#endif
+#ifdef PRTIM3
+  PRR1 &= ~_BV(PRTIM3);
+#endif
+#ifdef PRTIM4
+  PRR1 &= ~_BV(PRTIM4);
+#endif
+}
+void NarcolepticClass::enableSerial0() {
+  enableSerial();
+}
+void NarcolepticClass::enableSerial1() {
+#ifdef PRUSART1
+  PRR &= ~_BV(PRUSART1);
+#endif
+}
+void NarcolepticClass::enableSerial()
+{
 #ifdef PRUSART0
   PRR &= ~_BV(PRUSART0);
 #endif
@@ -420,12 +507,14 @@ void NarcolepticClass::enableSerial() {
   PRR &= ~_BV(PRUSART);
 #endif
 }
-void NarcolepticClass::enableADC() {
+void NarcolepticClass::enableADC()
+{
 #ifdef PRADC
   PRR &= ~_BV(PRADC);
 #endif
 }
-void NarcolepticClass::enableSPI() {
+void NarcolepticClass::enableSPI()
+{
 #ifdef PRSPI
   PRR &= ~_BV(PRSPI);
 #endif
@@ -436,17 +525,20 @@ void NarcolepticClass::enableSPI() {
   PRR1 &= ~_BV(PRSPI1);
 #endif
 }
-void NarcolepticClass::enableSPI0() {
+void NarcolepticClass::enableSPI0()
+{
 #ifdef PRSPI0
   PRR0 &= ~_BV(PRSPI0);
 #endif
 }
-void NarcolepticClass::enableSPI1() {
+void NarcolepticClass::enableSPI1()
+{
 #ifdef PRSPI1
   PRR1 &= ~_BV(PRSPI1);
 #endif
 }
-void NarcolepticClass::enableTouch() {
+void NarcolepticClass::enableTouch()
+{
 #ifdef PRPTC
   PRR1 &= ~_BV(PRPTC);
 #endif
