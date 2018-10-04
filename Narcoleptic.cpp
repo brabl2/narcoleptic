@@ -19,6 +19,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/common.h>
+#include <avr/power.h>          // library for power control
 //#include <util/delay.h>
 
 #include <avr/wdt.h>
@@ -34,7 +35,8 @@
 uint32_t watchdogTime_us = 16000;
 uint32_t millisCounter = 0;
 
-SIGNAL(WDT_vect)
+
+ISR(WDT_vect)
 {
   wdt_disable();
   wdt_reset();
@@ -44,6 +46,7 @@ SIGNAL(WDT_vect)
   WDTCR &= ~_BV(WDIE);
 #endif
 }
+
 
 void NarcolepticClass::sleep(uint8_t wdt_period, uint8_t sleep_mode)
 {
