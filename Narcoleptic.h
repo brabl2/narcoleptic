@@ -21,6 +21,7 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include <avr/sleep.h>
 
 #define NARCOLEPTIC_CALIBRATION_ENABLE 0
 
@@ -31,6 +32,8 @@ class NarcolepticClass
 {
   public:
     void delay(uint32_t milliseconds);
+    void sleepAdv(uint8_t wdt_period,uint8_t sleep_mode=SLEEP_MODE_PWR_DOWN,uint8_t eimsk=0,uint8_t pcmsk0=0,uint8_t pcmsk1=0,uint8_t pcmsk2=0,uint8_t twie=0);
+    void sleep(uint8_t wdt_period); // WDTO_8S, WDTO_4S, WDTO_2S, WDTO_1S, WDTO_500MS, WDTO_250MS, WDTO_120MS, WDTO_60MS, WDTO_30MS, WDTO_15MS
     uint32_t millis();
 
     void disableWire();
@@ -66,7 +69,6 @@ class NarcolepticClass
     void enableTouch();
 
   private:
-    void sleep(uint8_t,uint8_t);
     void calibrate();
 };
 extern NarcolepticClass Narcoleptic;

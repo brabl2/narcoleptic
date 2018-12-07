@@ -22,7 +22,6 @@
 //#include <util/delay.h>
 
 #include <avr/wdt.h>
-#include <avr/sleep.h>
 #include "Narcoleptic.h"
 
 #if !defined(PRR) && defined(PRR0)
@@ -44,7 +43,15 @@ SIGNAL(WDT_vect) {
 #endif
 }
 
-void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
+void NarcolepticClass::sleepAdv(uint8_t wdt_period,uint8_t sleep_mode,uint8_t eimsk,uint8_t pcmsk0,uint8_t pcmsk1,uint8_t pcmsk2,uint8_t twie) {
+// Sleep with advanced wake-up: additional wake-up events can be enabled based on the following table:
+//             7       6       5       4       3       2       1       0
+// EIMSK  :                                                  INT1    INT0
+// PCMSK0 :  PCINT7  PCINT6  PCINT5  PCINT4  PCINT3  PCINT2  PCINT1  PCINT0
+// PCMSK1 :          PCINT14 PCINT13 PCINT12 PCINT11 PCINT10 PCINT9  PCINT8
+// PCMSK2 :  PCINT23 PCINT22 PCINT21 PCINT20 PCINT19 PCINT18 PCINT17 PCINT16
+// twie   :  enables TWIE bit in TWCR register
+//
 
   MCUSR = 0;
 #ifdef WDTCSR
@@ -71,16 +78,16 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
   uint8_t EECRcopy = EECR; EECR &= ~_BV(EERIE);
 #endif
 #ifdef EIMSK
-  uint8_t EIMSKcopy = EIMSK; EIMSK = 0;
+  uint8_t EIMSKcopy = EIMSK; EIMSK = eimsk;
 #endif
 #ifdef PCMSK0
-  uint8_t PCMSK0copy = PCMSK0; PCMSK0 = 0;
+  uint8_t PCMSK0copy = PCMSK0; PCMSK0 = pcmsk0;
 #endif
 #ifdef PCMSK1
-  uint8_t PCMSK1copy = PCMSK1; PCMSK1 = 0;
+  uint8_t PCMSK1copy = PCMSK1; PCMSK1 = pcmsk1;
 #endif
 #ifdef PCMSK2
-  uint8_t PCMSK2copy = PCMSK2; PCMSK2 = 0;
+  uint8_t PCMSK2copy = PCMSK2; PCMSK2 = pcmsk2;
 #endif
 #ifdef TIMSK0
   uint8_t TIMSK0copy = TIMSK0; TIMSK0 = 0;
@@ -98,7 +105,10 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
   uint8_t UCSR0Bcopy = UCSR0B; UCSR0B &= ~(_BV(RXCIE0) | _BV(TXCIE0) | _BV(UDRIE0));
 #endif
 #ifdef TWCR
-  uint8_t TWCRcopy = TWCR; TWCR &= ~_BV(TWIE);
+  uint8_t TWCRcopy = TWCR;
+  if (!twie) {
+    TWCR &= ~_BV(TWIE);
+  }
 #endif
 #ifdef ACSR
   uint8_t ACSRcopy = ACSR; ACSR &= ~_BV(ACIE);
@@ -125,7 +135,9 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
   ACSR = ACSRcopy;
 #endif
 #ifdef TWCR
-  TWCR = TWCRcopy;
+  if (!twie) {
+    TWCR = TWCRcopy;
+  }
 #endif
 #ifdef UCSR0B
   UCSR0B = UCSR0Bcopy;
@@ -167,6 +179,9 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
 #endif
 }
 
+void NarcolepticClass::sleep(uint8_t wdt_period) {
+  sleepAdv(wdt_period,SLEEP_MODE_PWR_DOWN,0,0,0,0,0);
+}
 
 void NarcolepticClass::delay(uint32_t milliseconds) {
   millisCounter += milliseconds;
@@ -174,25 +189,25 @@ void NarcolepticClass::delay(uint32_t milliseconds) {
   uint32_t microseconds = milliseconds * 1000L;
 
   calibrate();
- if (microseconds > watchdogTime_us) {
+  if (microseconds > watchdogTime_us) {
     microseconds -= watchdogTime_us;
     uint32_t sleep_periods = microseconds / watchdogTime_us;
 #else
     uint32_t sleep_periods = milliseconds / 16;
 #endif
     while (sleep_periods >= 512) {
-      sleep(WDTO_8S,SLEEP_MODE_PWR_DOWN);
+      sleep(WDTO_8S);
       sleep_periods -= 512;
     }
-    if (sleep_periods & 256) sleep(WDTO_4S,SLEEP_MODE_PWR_DOWN);
-    if (sleep_periods & 128) sleep(WDTO_2S,SLEEP_MODE_PWR_DOWN);
-    if (sleep_periods & 64) sleep(WDTO_1S,SLEEP_MODE_PWR_DOWN);
-    if (sleep_periods & 32) sleep(WDTO_500MS,SLEEP_MODE_PWR_DOWN);
-    if (sleep_periods & 16) sleep(WDTO_250MS,SLEEP_MODE_PWR_DOWN);
-    if (sleep_periods & 8) sleep(WDTO_120MS,SLEEP_MODE_PWR_DOWN);
-    if (sleep_periods & 4) sleep(WDTO_60MS,SLEEP_MODE_PWR_DOWN);
-    if (sleep_periods & 2) sleep(WDTO_30MS,SLEEP_MODE_PWR_DOWN);
-    if (sleep_periods & 1) sleep(WDTO_15MS,SLEEP_MODE_PWR_DOWN);
+    if (sleep_periods & 256) sleep(WDTO_4S);
+    if (sleep_periods & 128) sleep(WDTO_2S);
+    if (sleep_periods & 64) sleep(WDTO_1S);
+    if (sleep_periods & 32) sleep(WDTO_500MS);
+    if (sleep_periods & 16) sleep(WDTO_250MS);
+    if (sleep_periods & 8) sleep(WDTO_120MS);
+    if (sleep_periods & 4) sleep(WDTO_60MS);
+    if (sleep_periods & 2) sleep(WDTO_30MS);
+    if (sleep_periods & 1) sleep(WDTO_15MS);
 #if NARCOLEPTIC_CALIBRATION_ENABLE
   }
 #endif
@@ -223,7 +238,7 @@ void NarcolepticClass::calibrate() {
   TIFR1 = 0;
   // Set clock to /64 (16ms should take approx. 4000 cycles at 16MHz clock)
   TCCR1B = _BV(CS11) | _BV(CS10);
-  sleep(WDTO_15MS,SLEEP_MODE_IDLE);
+  sleepAdv(WDTO_15MS,SLEEP_MODE_IDLE,0,0,0,0,0);
   uint16_t watchdogDuration = TCNT1;
   TCCR1B = 0; // Stop clock immediately
 

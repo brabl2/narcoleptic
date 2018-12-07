@@ -36,10 +36,14 @@
 ** auto-insert it if you select Sketch > Import Library > Narcoleptic. */
 
 #include <avr/wdt.h>
+#include <avr/sleep.h>
 #include <Narcoleptic.h>
 
 #define LED 13
-#define BUTTON 2
+#define BUTTON 2 // INT0
+
+void wakeupFunction(){
+}
 
 void setup() {
   pinMode(BUTTON,INPUT);
@@ -47,7 +51,7 @@ void setup() {
   pinMode(LED,OUTPUT);
   digitalWrite(LED,LOW);
 
-  // Narcoleptic.disableMillis(); Do not disable millis - we need it for our delay() function.
+  Narcoleptic.disableMillis();
   Narcoleptic.disableTimer1();
   Narcoleptic.disableTimer2();
   Narcoleptic.disableSerial();
@@ -70,25 +74,16 @@ void setup() {
 
 void loop() {
 
-  // Merlin the cat is snoozing... Connect digital pin 2 to ground to wake him up.
-  Narcoleptic.delay(500); // During this time power consumption is minimised
+  attachInterrupt(0,wakeupFunction,FALLING); // on pin 2 (INT0)
+  Narcoleptic.sleepAdv(WDTO_4S,SLEEP_MODE_PWR_DOWN,_BV(INT0)); // wake up after 4s or after button press
+  detachInterrupt(0);
 
-  // Instead of 'Narcoleptic.delay' function it is possible to use simple 'Narcoleptic.sleep' function 
-  // with following fixed values from <avr/wdt.h>:
-  // WDTO_8S, WDTO_4S, WDTO_2S, WDTO_1S, WDTO_500MS, WDTO_250MS, WDTO_120MS, WDTO_60MS, WDTO_30MS, WDTO_15MS 
-  // Narcoleptic.sleep(WDTO_500MS); // During this time power consumption is minimised
+  digitalWrite(LED,HIGH);
 
-  while (digitalRead(BUTTON) == LOW) {
-    // Wake up CPU. Unfortunately, Merlin does not like waking up.
+  attachInterrupt(0,wakeupFunction,FALLING); // on pin 2 (INT0)
+  Narcoleptic.sleepAdv(WDTO_4S,SLEEP_MODE_PWR_DOWN,_BV(INT0)); // wake up after 4s or after button press
+  detachInterrupt(0);
 
-    // Swipe claws left
-    digitalWrite(LED,HIGH);
-    Narcoleptic.sleep(WDTO_60MS);//delay(50);
+  digitalWrite(LED,LOW);
 
-    // Swipe claws right
-    digitalWrite(LED,LOW);
-    Narcoleptic.sleep(WDTO_60MS);//delay(50);
-  }
-
-  // Merlin the cat goes to sleep...
 }
