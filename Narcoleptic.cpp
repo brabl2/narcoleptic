@@ -25,6 +25,10 @@
 #include <avr/sleep.h>
 #include "Narcoleptic.h"
 
+#if !defined(PRR) && defined(PRR0)
+#define PRR PRR0
+#endif
+
 #if NARCOLEPTIC_CALIBRATION_ENABLE
 uint32_t watchdogTime_us = 16000;
 #endif
