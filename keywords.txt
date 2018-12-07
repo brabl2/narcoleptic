@@ -13,24 +13,42 @@ Narcoleptic	KEYWORD1
 #######################################
 
 delay	KEYWORD2
+sleep	KEYWORD2
+sleepAdv	KEYWORD2
 calibrate	KEYWORD2
 millis	KEYWORD2
 
 disableMillis	KEYWORD2
+disableTimer0	KEYWORD2
 disableTimer1	KEYWORD2
 disableTimer2	KEYWORD2
+disableTimer3	KEYWORD2
+disableTimer4	KEYWORD2
 disableSerial	KEYWORD2
+disableSerial0	KEYWORD2
+disableSerial1	KEYWORD2
 disableADC	KEYWORD2
 disableWire	KEYWORD2
 disableSPI	KEYWORD2
+disableSPI0	KEYWORD2
+disableSPI1	KEYWORD2
+disableTouch	KEYWORD2
 
 enableMillis	KEYWORD2
+enableTimer0	KEYWORD2
 enableTimer1	KEYWORD2
 enableTimer2	KEYWORD2
+enableTimer3	KEYWORD2
+enableTimer4	KEYWORD2
 enableSerial	KEYWORD2
+enableSerial0	KEYWORD2
+enableSerial1	KEYWORD2
 enableADC	KEYWORD2
 enableWire	KEYWORD2
 enableSPI	KEYWORD2
+enableSPI0	KEYWORD2
+enableSPI1	KEYWORD2
+enableTouch	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
