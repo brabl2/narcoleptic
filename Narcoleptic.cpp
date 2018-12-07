@@ -45,12 +45,6 @@ SIGNAL(WDT_vect) {
 }
 
 void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
-  
-#ifdef BODSE
-  // Turn off BOD in sleep (picopower devices only)
-  MCUCR |= _BV(BODSE);
-  MCUCR |= _BV(BODS);
-#endif
 
   MCUSR = 0;
 #ifdef WDTCSR
@@ -60,7 +54,7 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
   WDTCR &= ~_BV(WDE);
   WDTCR = _BV(WDIF) | _BV(WDIE) | _BV(WDCE);
 #endif
-  
+
   wdt_enable(wdt_period);
   wdt_reset();
 #ifdef WDTCSR
@@ -115,7 +109,7 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
 #if defined(SPMCSR) && defined(SPMIE)
   uint8_t SPMCSRcopy = SPMCSR; SPMCSR &= ~_BV(SPMIE);
 #endif
-  
+
   sei();
   sleep_mode();            // here the device is actually put to sleep!!
   wdt_disable();           // first thing after waking from sleep: disable watchdog...
@@ -165,7 +159,7 @@ void NarcolepticClass::sleep(uint8_t wdt_period,uint8_t sleep_mode) {
 #endif
 
   SREG = SREGcopy;
-  
+
 #ifdef WDTCSR
   WDTCSR &= ~_BV(WDIE);
 #else
@@ -178,10 +172,10 @@ void NarcolepticClass::delay(uint32_t milliseconds) {
   millisCounter += milliseconds;
 #if NARCOLEPTIC_CALIBRATION_ENABLE
   uint32_t microseconds = milliseconds * 1000L;
-  
+
   calibrate();
  if (microseconds > watchdogTime_us) {
-    microseconds -= watchdogTime_us; 
+    microseconds -= watchdogTime_us;
     uint32_t sleep_periods = microseconds / watchdogTime_us;
 #else
     uint32_t sleep_periods = milliseconds / 16;
@@ -209,7 +203,7 @@ void NarcolepticClass::calibrate() {
   // Calibration needs Timer 1. Ensure it is powered up.
   uint8_t PRRcopy = PRR;
   PRR &= ~_BV(PRTIM1);
-  
+
   uint8_t TCCR1Bcopy = TCCR1B;
   TCCR1B &= ~(_BV(CS12) | _BV(CS11) | _BV(CS10)); // Stop clock immediately
   // Capture Timer 1 state
@@ -245,7 +239,7 @@ void NarcolepticClass::calibrate() {
 
   // Restore power reduction state
   PRR = PRRcopy;
-  
+
   watchdogTime_us = watchdogDuration * (64 * 1000000 / F_CPU); // should be approx. 16000
 }
 #endif
