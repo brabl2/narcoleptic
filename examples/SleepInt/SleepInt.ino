@@ -46,8 +46,7 @@ void wakeupFunction(){
 }
 
 void setup() {
-  pinMode(BUTTON,INPUT);
-  digitalWrite(BUTTON,HIGH);
+  pinMode(BUTTON,INPUT_PULLUP);
   pinMode(LED,OUTPUT);
   digitalWrite(LED,LOW);
 
@@ -68,19 +67,21 @@ void setup() {
   DIDR1 = (1<<AIN1D)|(1<<AIN0D); //Disable digital input buffer on AIN1/0
   //
   // ATtiny25/45/85
-  //Disable digital input buffers on all ADC0-ADC3 + AIN1/0 pins
-  //DIDR0 = (1<<ADC0D)|(1<<ADC2D)|(1<<ADC3D)|(1<<ADC1D)|(1<<AIN1D)|(1<<AIN0D);
+  //Disable digital input buffers on all ADC0,ADC2,ADC3 + AIN1/0 pins
+  //DIDR0 = (1<<ADC0D)|(1<<ADC2D)|(1<<ADC3D)|(1<<AIN1D)|(1<<AIN0D);
 }
 
 void loop() {
 
   attachInterrupt(0,wakeupFunction,FALLING); // on pin 2 (INT0)
+  //attachInterrupt(0,wakeupFunction,LOW); // on pin 2 (INT0) // ATtiny25/45/85 // Only LOW level interrupt is working during SLEEP_MODE_PWR_DOWN for INT0.
   Narcoleptic.sleepAdv(WDTO_4S,SLEEP_MODE_PWR_DOWN,_BV(INT0)); // wake up after 4s or after button press
   detachInterrupt(0);
 
   digitalWrite(LED,HIGH);
 
   attachInterrupt(0,wakeupFunction,FALLING); // on pin 2 (INT0)
+  //attachInterrupt(0,wakeupFunction,LOW); // on pin 2 (INT0) // ATtiny25/45/85 // Only LOW level interrupt is working during SLEEP_MODE_PWR_DOWN for INT0.
   Narcoleptic.sleepAdv(WDTO_4S,SLEEP_MODE_PWR_DOWN,_BV(INT0)); // wake up after 4s or after button press
   detachInterrupt(0);
 

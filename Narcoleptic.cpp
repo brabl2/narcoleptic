@@ -25,7 +25,15 @@
 #include "Narcoleptic.h"
 
 #if !defined(PRR) && defined(PRR0)
-#define PRR PRR0
+  #define PRR PRR0
+#endif
+
+// ATtiny support
+#if !defined(PCMSK0) && defined(PCMSK)
+  #define PCMSK0 PCMSK
+#endif
+#if !defined(EIMSK) && defined(GIMSK)
+  #define EIMSK GIMSK
 #endif
 
 #if NARCOLEPTIC_CALIBRATION_ENABLE
@@ -45,13 +53,19 @@ SIGNAL(WDT_vect) {
 
 void NarcolepticClass::sleepAdv(uint8_t wdt_period,uint8_t sleep_mode,uint8_t eimsk,uint8_t pcmsk0,uint8_t pcmsk1,uint8_t pcmsk2,uint8_t twie) {
 // Sleep with advanced wake-up: additional wake-up events can be enabled based on the following table:
-//             7       6       5       4       3       2       1       0
-// EIMSK  :                                                  INT1    INT0
-// PCMSK0 :  PCINT7  PCINT6  PCINT5  PCINT4  PCINT3  PCINT2  PCINT1  PCINT0
-// PCMSK1 :          PCINT14 PCINT13 PCINT12 PCINT11 PCINT10 PCINT9  PCINT8
-// PCMSK2 :  PCINT23 PCINT22 PCINT21 PCINT20 PCINT19 PCINT18 PCINT17 PCINT16
-// twie   :  enables TWIE bit in TWCR register
+// ATmega         :
+//                     7       6       5       4       3       2       1       0
+// eimsk ->EIMSK  :                                                  INT1    INT0
+// pcmsk0->PCMSK0 :  PCINT7  PCINT6  PCINT5  PCINT4  PCINT3  PCINT2  PCINT1  PCINT0
+// pcmsk1->PCMSK1 :          PCINT14 PCINT13 PCINT12 PCINT11 PCINT10 PCINT9  PCINT8
+// pcmsk2->PCMSK2 :  PCINT23 PCINT22 PCINT21 PCINT20 PCINT19 PCINT18 PCINT17 PCINT16
+// twie           :  enables TWIE bit in TWCR register
 //
+// ATtiny25/45/85 :  (Only LOW level interrupt is working during SLEEP_MODE_PWR_DOWN for INT0.)
+//                     7       6       5       4       3       2       1       0
+// eimsk ->GIMSK  :          INT0    PCIE
+// pcmsk0->PCMSK  :                  PCINT5  PCINT4  PCINT3  PCINT2  PCINT1  PCINT0
+
 
   MCUSR = 0;
 #ifdef WDTCSR
