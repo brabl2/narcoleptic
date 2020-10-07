@@ -1,4 +1,4 @@
-Narcoleptic uses some features of the microcontroller to reduce power consumption.
+Narcoleptic uses some features of the AVR microcontroller to reduce power consumption.
 These are:
 
   Sleep mode:
@@ -30,6 +30,8 @@ Narcoleptic tricks:
   voltage and temperature ranges. Narcoleptic measures its speed against the main
   clock, and bases all its timings on the corrected value. Provided the operating
   voltage and temperature remain stable, Narcoleptic should maintain < ±1% accuracy.
+  The calibration might be disabled using NARCOLEPTIC_CALIBRATION_ENABLE 0 when 
+  the high accuracy is not required.
 
   The 128kHz oscillator only provides sleep periods of 8,4,2,1 seconds, 500, 250,
   125, 62, 31 and 15ms. Narcoleptic performs multiple sleeps to achieve the requested
