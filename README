@@ -34,7 +34,8 @@ Narcoleptic tricks:
     1) Uncalibrated narcoleptic.delay() (smaller code size)
     2) Calibrated narcoleptic.delayCal() (higher accuracy)
        The calibration takes approx. 16ms, CPU is in SLEEP_MODE_IDLE during this time.
-       The calibration result is remembered, so it is not necessary to run the calibration every time together with the narcoleptic.delayCal().
+       The calibration result is remembered,
+       so it is not necessary to run the calibration every time together with the narcoleptic.delayCal().
 
   The 128kHz oscillator only provides sleep periods of 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32 and 16ms.
   Narcoleptic performs multiple sleeps to achieve the requested timing.
@@ -56,8 +57,6 @@ Narcoleptic gotchas:
     millis() ticker
     All timer activity
   
-  Narcoleptic is best used when nothing is going on anyway, to simulate a power-off
-  state.
+  Narcoleptic is best used when nothing is going on anyway, to simulate a power-off state.
   
-  In a well optimised circuit, Narcoleptic can run for several years off
-  a couple of AAA batteries.
+  In a well optimised circuit, Narcoleptic can run for several years off a couple of AAA batteries.
