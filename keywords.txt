@@ -13,6 +13,7 @@ Narcoleptic	KEYWORD1
 #######################################
 
 delay	KEYWORD2
+delayCal	KEYWORD2
 sleep	KEYWORD2
 sleepAdv	KEYWORD2
 millis	KEYWORD2

@@ -3,10 +3,10 @@ These are:
 
   Sleep mode:
     Freezes all microcontroller functions to dramatically reduce power.
+    The CPU is in SLEEP_MODE_PWR_DOWN during this time.
     
   128kHz internal oscillator:
-    This is a very low power oscillator, used to inform the microcontroller when to
-    wake up.
+    This is a very low power oscillator, used to inform the microcontroller when to wake up.
 
   Power reduction:
     Unused microcontroller functions can be powered down to save additional power.
@@ -30,12 +30,14 @@ Narcoleptic tricks:
   voltage and temperature ranges. Narcoleptic measures its speed against the main
   clock, and bases all its timings on the corrected value. Provided the operating
   voltage and temperature remain stable, Narcoleptic should maintain < ±1% accuracy.
-  The calibration might be disabled using NARCOLEPTIC_CALIBRATION_ENABLE 0 when 
-  the high accuracy is not required.
+  The are two versions of the Narcoleptic delay function:
+    1) Uncalibrated narcoleptic.delay() (smaller code size)
+    2) Calibrated narcoleptic.delayCal() (higher accuracy)
+       The calibration takes approx. 16ms, CPU is in SLEEP_MODE_IDLE during this time.
+       The calibration result is remembered, so it is not necessary to run the calibration every time together with the narcoleptic.delayCal().
 
-  The 128kHz oscillator only provides sleep periods of 8,4,2,1 seconds, 500, 250,
-  125, 62, 31 and 15ms. Narcoleptic performs multiple sleeps to achieve the requested
-  timing.
+  The 128kHz oscillator only provides sleep periods of 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32 and 16ms.
+  Narcoleptic performs multiple sleeps to achieve the requested timing.
 
 Keeping track of time:
   Narcoleptic shuts down almost everything - even the millis() counting routine.

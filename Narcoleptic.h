@@ -23,15 +23,14 @@
 #include <stdbool.h>
 #include <avr/sleep.h>
 
-#define NARCOLEPTIC_CALIBRATION_ENABLE 0
-
 #define enableTimer0 enableMillis
 #define disableTimer0 disableMillis
 
 class NarcolepticClass
 {
   public:
-    void delay(uint32_t milliseconds);
+    void delay(uint32_t milliseconds);                             // uncalibrated delay
+    void delayCal(uint32_t milliseconds, uint8_t run_calibration); // calibrated delay
     void sleepAdv(uint8_t wdt_period,uint8_t sleep_mode=SLEEP_MODE_PWR_DOWN,uint8_t eimsk=0,uint8_t pcmsk0=0,uint8_t pcmsk1=0,uint8_t pcmsk2=0,uint8_t twie=0);
     void sleep(uint8_t wdt_period); // WDTO_8S, WDTO_4S, WDTO_2S, WDTO_1S, WDTO_500MS, WDTO_250MS, WDTO_120MS, WDTO_60MS, WDTO_30MS, WDTO_15MS
     uint32_t millis();
@@ -62,6 +61,8 @@ class NarcolepticClass
     void enableTimer3();
     void enableTimer4();
     void enableSerial();
+    void enableSerial0();
+    void enableSerial1();
     void enableADC();
     void enableSPI();
     void enableSPI0();
@@ -69,7 +70,7 @@ class NarcolepticClass
     void enableTouch();
 
   private:
-    void calibrate();
+    uint16_t calibrate();
 };
 extern NarcolepticClass Narcoleptic;
 

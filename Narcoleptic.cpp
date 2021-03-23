@@ -36,9 +36,6 @@
   #define EIMSK GIMSK
 #endif
 
-#if NARCOLEPTIC_CALIBRATION_ENABLE
-uint32_t watchdogTime_us = 16000;
-#endif
 uint32_t millisCounter = 0;
 
 SIGNAL(WDT_vect) {
@@ -197,39 +194,83 @@ void NarcolepticClass::sleep(uint8_t wdt_period) {
   sleepAdv(wdt_period,SLEEP_MODE_PWR_DOWN,0,0,0,0,0);
 }
 
-void NarcolepticClass::delay(uint32_t milliseconds) {
+// uncalibrated delay
+void NarcolepticClass::delay(uint32_t milliseconds) { // milliseconds is expected to be >= 16
   millisCounter += milliseconds;
-#if NARCOLEPTIC_CALIBRATION_ENABLE
-  uint32_t microseconds = milliseconds * 1000L;
+  uint32_t sleep_periods = milliseconds / 16;
 
-  calibrate();
-  if (microseconds > watchdogTime_us) {
-    microseconds -= watchdogTime_us;
-    uint32_t sleep_periods = microseconds / watchdogTime_us;
+  // <avr/wdt.h> defines :
+  // WDTO_15MS  = 0 = 16ms
+  // WDTO_30MS  = 1 = 32ms
+  // WDTO_60MS  = 2 = 64ms
+  // WDTO_120MS = 3 = 128ms
+  // WDTO_250MS = 4 = 256ms
+  // WDTO_500MS = 5 = 512ms
+  // WDTO_1S    = 6 = 1024ms
+  // WDTO_2S    = 7 = 2048ms
+  // WDTO_4S    = 8 = 4096ms // implemented when WDP3 exists
+  // WDTO_8S    = 9 = 8192ms // implemented when WDP3 exists
+  uint8_t i=WDTO_15MS;
+  while (sleep_periods > 0) {
+#ifdef WDP3
+    if (i<WDTO_8S) {
 #else
-    uint32_t sleep_periods = milliseconds / 16;
+    if (i<WDTO_2S) {
 #endif
-    while (sleep_periods >= 512) {
-      sleep(WDTO_8S);
-      sleep_periods -= 512;
+      if (sleep_periods & 1) sleep(i);
+      i++;
+      sleep_periods >>= 1;
+    } else {
+      sleep(i);
+      sleep_periods--;
     }
-    if (sleep_periods & 256) sleep(WDTO_4S);
-    if (sleep_periods & 128) sleep(WDTO_2S);
-    if (sleep_periods & 64) sleep(WDTO_1S);
-    if (sleep_periods & 32) sleep(WDTO_500MS);
-    if (sleep_periods & 16) sleep(WDTO_250MS);
-    if (sleep_periods & 8) sleep(WDTO_120MS);
-    if (sleep_periods & 4) sleep(WDTO_60MS);
-    if (sleep_periods & 2) sleep(WDTO_30MS);
-    if (sleep_periods & 1) sleep(WDTO_15MS);
-#if NARCOLEPTIC_CALIBRATION_ENABLE
   }
-#endif
 }
 
-#if NARCOLEPTIC_CALIBRATION_ENABLE
-void NarcolepticClass::calibrate() {
+// calibrated delay
+void NarcolepticClass::delayCal(uint32_t milliseconds, uint8_t run_calibration) { // milliseconds is expected to be >= 16
+  millisCounter += milliseconds;
+  uint32_t microseconds = milliseconds * 1000L;
+  static uint16_t watchdogTime_us = 16000;
+  if (run_calibration) {
+    watchdogTime_us = calibrate(); // Takes approx. 16ms, CPU is in SLEEP_MODE_IDLE during this time
+    if (microseconds >= watchdogTime_us) {
+      microseconds -= watchdogTime_us;
+    }
+  }
+  uint32_t sleep_periods = microseconds / watchdogTime_us;
+
+  // <avr/wdt.h> defines :
+  // WDTO_15MS  = 0 = 16ms
+  // WDTO_30MS  = 1 = 32ms
+  // WDTO_60MS  = 2 = 64ms
+  // WDTO_120MS = 3 = 128ms
+  // WDTO_250MS = 4 = 256ms
+  // WDTO_500MS = 5 = 512ms
+  // WDTO_1S    = 6 = 1024ms
+  // WDTO_2S    = 7 = 2048ms
+  // WDTO_4S    = 8 = 4096ms // implemented when WDP3 exists
+  // WDTO_8S    = 9 = 8192ms // implemented when WDP3 exists
+  uint8_t i=WDTO_15MS;
+  while (sleep_periods > 0) {
+#ifdef WDP3
+    if (i<WDTO_8S) {
+#else
+    if (i<WDTO_2S) {
+#endif
+      if (sleep_periods & 1) sleep(i);
+      i++;
+      sleep_periods >>= 1;
+    } else {
+      sleep(i);
+      sleep_periods--;
+    }
+  }
+}
+
+uint16_t NarcolepticClass::calibrate() {
   // Calibration needs Timer 1. Ensure it is powered up.
+  // Takes approx. 16ms, CPU is in SLEEP_MODE_IDLE during this time
   uint8_t PRRcopy = PRR;
   PRR &= ~_BV(PRTIM1);
 
@@ -269,9 +310,8 @@ void NarcolepticClass::calibrate() {
   // Restore power reduction state
   PRR = PRRcopy;
 
-  watchdogTime_us = watchdogDuration * (64 * 1000000 / F_CPU); // should be approx. 16000
+  return watchdogDuration * (64 * 1000000 / F_CPU); // should be approx. 16000
 }
-#endif
 
 uint32_t NarcolepticClass::millis() {
   return millisCounter;

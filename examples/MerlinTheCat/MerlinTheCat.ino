@@ -46,7 +46,7 @@ void setup() {
   pinMode(LED,OUTPUT);
   digitalWrite(LED,LOW);
 
-  // Narcoleptic.disableMillis(); Do not disable millis - we need it for our delay() function.
+  // Narcoleptic.disableMillis(); Do not disable millis - we need it for our delayCal() function.
   Narcoleptic.disableTimer1();
   Narcoleptic.disableTimer2();
   Narcoleptic.disableSerial();
@@ -70,7 +70,8 @@ void setup() {
 void loop() {
 
   // Merlin the cat is snoozing... Connect digital pin 2 to ground to wake him up.
-  Narcoleptic.delay(500); // During this time power consumption is minimised
+  Narcoleptic.delay(500);      // During this time power consumption is minimised // uncalibrated delay
+  //Narcoleptic.delayCal(500,1); // During this time power consumption is minimised // calibrated delay + run the calibration
 
   // Instead of 'Narcoleptic.delay' function it is possible to use simple 'Narcoleptic.sleep' function 
   // with following fixed values from <avr/wdt.h>:
@@ -82,11 +83,15 @@ void loop() {
 
     // Swipe claws left
     digitalWrite(LED,HIGH);
-    Narcoleptic.sleep(WDTO_60MS);//delay(50);
+    Narcoleptic.delay(50); // uncalibrated delay
+    //Narcoleptic.delayCal(50,0); // calibrated delay - do not run the calibration (the calibration result is remembered, so it is not necessary to run the calibration every time)
+    //Narcoleptic.sleep(WDTO_60MS);
 
     // Swipe claws right
     digitalWrite(LED,LOW);
-    Narcoleptic.sleep(WDTO_60MS);//delay(50);
+    Narcoleptic.delay(50); // uncalibrated delay
+    //Narcoleptic.delayCal(50,0); // calibrated delay - do not run the calibration (the calibration result is remembered, so it is not necessary to run the calibration every time)
+    //Narcoleptic.sleep(WDTO_60MS);
   }
 
   // Merlin the cat goes to sleep...
