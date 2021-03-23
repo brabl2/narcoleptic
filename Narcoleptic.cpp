@@ -437,6 +437,7 @@ void NarcolepticClass::enableSerial0() {
 #ifdef PRUSART0
   PRR &= ~_BV(PRUSART0);
 #endif
+}
 void NarcolepticClass::enableSerial1() {
 #ifdef PRUSART1
   PRR &= ~_BV(PRUSART1);
