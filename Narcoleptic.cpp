@@ -338,16 +338,10 @@ void NarcolepticClass::disableSerial0() {
 #ifdef PRUSART0
   PRR |= _BV(PRUSART0);
 #endif
-#ifdef PRUSART
-  PRR |= _BV(PRUSART);
-#endif
 }
 void NarcolepticClass::disableSerial1() {
 #ifdef PRUSART1
   PRR |= _BV(PRUSART1);
-#endif
-#ifdef PRUSART
-  PRR |= _BV(PRUSART);
 #endif
 }
 void NarcolepticClass::disableADC() {
@@ -432,8 +426,20 @@ void NarcolepticClass::enableSerial() {
 #ifdef PRUSART0
   PRR &= ~_BV(PRUSART0);
 #endif
+#ifdef PRUSART1
+  PRR &= ~_BV(PRUSART1);
+#endif
 #ifdef PRUSART
   PRR &= ~_BV(PRUSART);
+#endif
+}
+void NarcolepticClass::enableSerial0() {
+#ifdef PRUSART0
+  PRR &= ~_BV(PRUSART0);
+#endif
+void NarcolepticClass::enableSerial1() {
+#ifdef PRUSART1
+  PRR &= ~_BV(PRUSART1);
 #endif
 }
 void NarcolepticClass::enableADC() {

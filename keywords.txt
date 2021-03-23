@@ -15,7 +15,6 @@ Narcoleptic	KEYWORD1
 delay	KEYWORD2
 sleep	KEYWORD2
 sleepAdv	KEYWORD2
-calibrate	KEYWORD2
 millis	KEYWORD2
 
 disableMillis	KEYWORD2
@@ -29,6 +28,8 @@ disableSerial0	KEYWORD2
 disableSerial1	KEYWORD2
 disableADC	KEYWORD2
 disableWire	KEYWORD2
+disableWire0	KEYWORD2
+disableWire1	KEYWORD2
 disableSPI	KEYWORD2
 disableSPI0	KEYWORD2
 disableSPI1	KEYWORD2
@@ -45,6 +46,8 @@ enableSerial0	KEYWORD2
 enableSerial1	KEYWORD2
 enableADC	KEYWORD2
 enableWire	KEYWORD2
+enableWire0	KEYWORD2
+enableWire1	KEYWORD2
 enableSPI	KEYWORD2
 enableSPI0	KEYWORD2
 enableSPI1	KEYWORD2
